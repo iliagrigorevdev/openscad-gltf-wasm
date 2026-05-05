@@ -22,12 +22,7 @@ export async function convertScadToGltf(scadCode, wasmUrl) {
   instance.FS.writeFile("/input.scad", scadCode);
 
   // Compile to GLB
-  instance.callMain([
-    "/input.scad",
-    "-o",
-    "output.glb",
-    "--enable=lazy-union",
-  ]);
+  instance.callMain(["/input.scad", "-o", "output.glb", "--enable=lazy-union"]);
 
   // Read the resulting GLB byte array back from the virtual file system
   const outputArray = instance.FS.readFile("/output.glb");

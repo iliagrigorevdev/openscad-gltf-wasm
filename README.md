@@ -12,7 +12,7 @@ This WASM module was generated from the `gltf` branch of the [openscad fork](htt
 - **Extended PBR Material Support:** Native extensions to the OpenSCAD `color()` module supporting `metalness`, `roughness`, `transmission` (glass), `clearcoat`, and `sheen`.
 - **Skeletal Animation:** Define animated armatures and bones directly within your `.scad` files.
 - **True Skeletal Skinning:** Exports absolute world transforms and properly bound animation tracks.
-- **LLM Friendly:** Includes a built-in prompt generator (`prompt.sh`) to help AI models (like ChatGPT or Claude) write compatible OpenSCAD scripts utilizing the new features.
+- **LLM Friendly:** Includes a built-in prompt generator (`prompt.js`) to help AI models (like Gemini or Claude) write compatible OpenSCAD scripts utilizing the new features.
 
 ---
 
@@ -114,17 +114,23 @@ armature(animations = [
 
 ---
 
-## AI Integration (`prompt.sh`)
+## AI Integration (`prompt.js`)
 
-Because LLMs (like ChatGPT or Claude) only know standard OpenSCAD syntax up to their training cutoff, we've included a helper script to generate LLM prompts. This injects the rules for PBR and animations into your prompt context.
+Because LLMs (like Gemini or Claude) only know standard OpenSCAD syntax up to their training cutoff, we've included a helper function to generate LLM prompts. This injects the rules for PBR and animations directly into your prompt context.
 
 **Usage:**
 
-```bash
-./node_modules/openscad-gltf-wasm/prompt.sh "a futuristic glass sword with a glowing metallic handle, animated to spin 360 degrees"
-```
+```javascript
+import { generatePrompt } from "openscad-gltf-wasm/prompt";
 
-_This will copy a highly-detailed system prompt to your clipboard, ready to be pasted into your AI tool of choice to generate perfectly compatible code for this library._
+const description =
+  "a futuristic glass sword with a glowing metallic handle, animated to spin 360 degrees";
+const promptContext = generatePrompt(description);
+
+// You can now pass this context string directly to an AI API
+// or print it to the console to paste into Gemini.
+console.log(promptContext);
+```
 
 ---
 

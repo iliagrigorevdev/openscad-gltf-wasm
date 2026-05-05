@@ -1,13 +1,16 @@
-#!/bin/bash
+/**
+ * Generates an LLM prompt containing the required syntax rules for PBR and Animations
+ * in this custom OpenSCAD fork.
+ *
+ * @param {string} description - The description of the object you want the AI to design.
+ * @returns {string} The fully formatted LLM prompt.
+ */
+export function generatePrompt(description) {
+  if (!description) {
+    throw new Error("A description is required to generate a prompt.");
+  }
 
-# Check if arguments were provided
-if [ -z "$1" ]; then
-    echo "Usage: $0 <description of the object>"
-    exit 1
-fi
-
-# The improved prompt text
-PROMPT="Generate an OpenSCAD script to design the following: $*.
+  return `Generate an OpenSCAD script to design the following: ${description}.
 
 Please utilize extended color attributes, specifically including 'roughness', 'metalness', 'clearcoat', 'clearcoatRoughness', 'sheen', 'sheenColor', 'sheenRoughness', 'transmission', and 'thickness' parameters.
 
@@ -24,23 +27,14 @@ Important PBR rules:
 
 Important Animation rules:
 - Wrapping: Use the 'armature(animations=...)' module at the root to wrap all animated components.
-- Hierarchies: Use the 'bone(name=\"BoneName\", t=[x,y,z], r=[x,y,z])' module to define hierarchical animated parts.
+- Hierarchies: Use the 'bone(name="BoneName", t=[x,y,z], r=[x,y,z])' module to define hierarchical animated parts.
 - Animation Data: The 'animations' property is an array of tracks defining keyframes for each bone. Format:
   animations = [
-    [\"BoneName\", [
+    ["BoneName", [
       [time_in_seconds, [rot_x, rot_y, rot_z], [trans_x, trans_y, trans_z]], // Translation is optional
       [1.0, [0, 90, 0], [0, 5, 0]],
       ...
     ]]
   ];
-- Translational Animation: If you want a bone to move translationally, provide the [trans_x, trans_y, trans_z] array in the keyframes. If omitted, the bone defaults to its resting position."
-
-# Copy to clipboard and notify user
-# Note: Using xclip for Linux. For macOS, use pbcopy.
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo -n "$PROMPT" | pbcopy
-else
-    echo -n "$PROMPT" | xclip -sel clip
-fi
-
-echo "✅ Copied to clipboard: $PROMPT"
+- Translational Animation: If you want a bone to move translationally, provide the [trans_x, trans_y, trans_z] array in the keyframes. If omitted, the bone defaults to its resting position.`;
+}
