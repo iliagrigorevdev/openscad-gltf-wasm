@@ -1,9 +1,11 @@
 {
   "name": "openscad-gltf-wasm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "openscad.js",
   "exports": {
     ".": "./openscad.js",
+    "./convert": "./convert.js",
+    "./convert.js": "./convert.js",
     "./openscad.wasm": "./openscad.wasm"
   }
 }
