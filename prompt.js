@@ -39,6 +39,7 @@ color([0.2, 0.2, 0.2], alpha=1.0, metalness=1.0, roughness=0.3, iridescence=1.0,
 Important Animation rules:
 - Wrapping: Use the 'armature(animations=...)' module at the root to wrap all animated components.
 - Hierarchies: Use the 'bone(name="BoneName", t=[x,y,z], r=[x,y,z])' module to define hierarchical animated parts.
+- Auto-Unioning: Any child meshes (e.g., cube, cylinder, imported objects) placed directly inside an 'armature()' or 'bone()' node are automatically unioned together by the engine. Child bones remain separate nodes in the hierarchy.
 - Animation Data: The 'animations' property is an array of tracks defining keyframes for each bone. Format:
   animations = [
     ["BoneName", [
