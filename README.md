@@ -1,10 +1,12 @@
-# openscad-gltf-wasm
+# OpenSCAD GLTF WASM
 
 A powerful WebAssembly (WASM) build of a custom OpenSCAD fork that enables direct compilation of OpenSCAD (`.scad`) scripts to **glTF/GLB** formats natively in JavaScript (Node.js and Browser).
 
 Unlike standard OpenSCAD, this custom engine supports **Physically Based Rendering (PBR)** materials and **Hierarchical Skeletal Animations**, making it a perfect bridge between procedural CAD generation and modern 3D web rendering engines (like Three.js or Babylon.js).
 
-This WASM module was generated from the `gltf` branch of the [openscad fork](https://github.com/iliagrigorevdev/openscad).
+This WASM module was generated from the `gltf` branch of the forked [openscad](https://github.com/iliagrigorevdev/openscad).
+
+**🌐 Live Demo:** Try the online viewer based on this WASM package here: [openscad-gltf-viewer](https://iliagrigorevdev.github.io/openscad-gltf-viewer/)
 
 ## Features
 
