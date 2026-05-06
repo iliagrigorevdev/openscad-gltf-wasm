@@ -12,18 +12,29 @@ export function generatePrompt(description) {
 
   return `Generate an OpenSCAD script to design the following: ${description}.
 
-Please utilize extended color attributes, specifically including 'roughness', 'metalness', 'clearcoat', 'clearcoatRoughness', 'sheen', 'sheenColor', 'sheenRoughness', 'transmission', and 'thickness' parameters.
+Please utilize extended color attributes, specifically including 'roughness', 'metalness', 'clearcoat', 'clearcoatRoughness', 'sheen', 'sheenColor', 'sheenRoughness', 'transmission', 'thickness', 'attenuationColor', 'attenuationDistance', 'ior', 'emissive', 'emissiveIntensity', 'specularColor', 'specularIntensity', 'iridescence', 'iridescenceIOR', 'anisotropy', and 'anisotropyRotation' parameters.
 
 Important PBR rules:
 - Metalness: For solid metallic materials (e.g., gold, steel), use metalness near 1.0. High metalness blocks light transmission. (Default: 0.0)
-- Roughness: Controls surface finish. 0.0 is perfectly smooth/glossy, while 1.0 is completely matte. (Default: 0.0)
+- Roughness: Controls surface finish. 0.0 is perfectly smooth/glossy, while 1.0 is completely matte. (Default: 1.0)
 - Transmission: Degree of optical transparency (0.0 to 1.0) for materials like glass or water. Note: When transmission is non-zero, alpha (opacity) should be set to 1.0. (Default: 0.0)
 - Thickness: The thickness of the volume beneath the surface. If 0.0, the material is thin-walled (like a bubble). If > 0, it acts as a solid volume boundary (like a block of glass). (Default: 0.0)
+- Attenuation Color & Distance: Used with transmission and thickness to simulate volume absorption (colored glass or liquids). Distance is how far light travels to reach the attenuationColor. (Defaults: [1.0, 1.0, 1.0] and 0.0)
+- IOR (Index of Refraction): Controls how much light bends when entering a transmissive or clearcoat material. Water is ~1.33, Window Glass ~1.5, Diamond ~2.4. (Default: 1.5)
 - Clearcoat: Adds a clear, reflective layer on top of the base material (car paint, varnished wood, or wet surfaces). 1.0 is fully coated. (Default: 0.0)
 - Clearcoat Roughness: Controls the smoothness of the clearcoat layer. (Default: 0.0)
 - Sheen: Simulates backscattering from microfibers, creating a soft velvet-like rim light useful for cloth and fabrics. 1.0 is full intensity. (Default: 0.0)
 - Sheen Color: Sets the RGB tint of the sheen layer (e.g., sheenColor = [1.0, 0.5, 0.5]). (Default: [0.0, 0.0, 0.0])
 - Sheen Roughness: Controls the roughness of the sheen layer. (Default: 0.0)
+- Emissive & Emissive Intensity: Makes the material glow. Emissive is an RGB color vector, intensity is a float multiplier. (Defaults: [0.0, 0.0, 0.0] and 1.0)
+- Specular Color & Intensity: Overrides the default specular reflection. (Defaults: [1.0, 1.0, 1.0] and 1.0)
+- Iridescence & Iridescence IOR: Simulates thin-film interference like soap bubbles, oil spills, or pearlescent surfaces. (Defaults: 0.0 and 1.3)
+- Anisotropy & Rotation: Creates stretched directional highlights, essential for brushed metal, satin, or hair. Rotation is in radians. (Defaults: 0.0 and 0.0)
+
+Example Material Usage:
+// Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])
+color([0.2, 0.2, 0.2], alpha=1.0, metalness=1.0, roughness=0.3, iridescence=1.0, emissive=[0.0, 0.5, 1.0], emissiveIntensity=2.0)
+  cube([10, 10, 10]);
 
 Important Animation rules:
 - Wrapping: Use the 'armature(animations=...)' module at the root to wrap all animated components.
