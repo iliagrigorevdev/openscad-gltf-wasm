@@ -11,7 +11,7 @@ This WASM module was generated from the `gltf` branch of the forked [openscad](h
 ## Features
 
 - **Direct SCAD to GLB conversion:** Compile geometry directly to web-ready binary glTF.
-- **Extended PBR Material Support:** Native extensions to the OpenSCAD `color()` module supporting `metalness`, `roughness`, `transmission` (glass), `clearcoat`, and `sheen`.
+- **Extended PBR Material Support:** Native extensions to the OpenSCAD `color()` module supporting `metalness`, `roughness`, `transmission` (glass), `clearcoat`, `sheen`, `ior`, `emissive`, `specular`, `iridescence`, and `anisotropy`.
 - **Skeletal Animation:** Define animated armatures and bones directly within your `.scad` files.
 - **True Skeletal Skinning:** Exports absolute world transforms and properly bound animation tracks.
 - **LLM Friendly:** Includes a built-in prompt generator (`prompt.js`) to help AI models (like Gemini or Claude) write compatible OpenSCAD scripts utilizing the new features.
@@ -83,11 +83,22 @@ color(
     metalness = 1.0,           // 1.0 for metals, blocks light transmission
     transmission = 0.9,        // 0.0 to 1.0 for glass/water transparency (requires alpha=1.0)
     thickness = 2.0,           // Volume thickness for refraction
+    ior = 1.5,                 // Index of refraction
+    attenuationColor = [1.0, 1.0, 1.0], // Color of light passing through volume
+    attenuationDistance = 0.0, // Distance light travels before fully tinted
     clearcoat = 1.0,           // Adds a clear reflective top layer (car paint/wet surfaces)
     clearcoatRoughness = 0.1,
     sheen = 1.0,               // Velvet/fabric rim lighting
     sheenColor = [1.0, 0.5, 0.5],
-    sheenRoughness = 0.2
+    sheenRoughness = 0.2,
+    emissive = [0.0, 0.0, 0.0], // Glowing color
+    emissiveIntensity = 1.0,    // Strength of the glow
+    specularColor = [1.0, 1.0, 1.0], // Tint for specular highlights
+    specularIntensity = 1.0,    // Strength of specular highlights
+    iridescence = 0.0,          // Thin-film interference effect (soap bubble)
+    iridescenceIOR = 1.3,
+    anisotropy = 0.0,           // Directional reflection (brushed metal)
+    anisotropyRotation = 0.0
 ) {
     cylinder(h=10, r=5);
 }
