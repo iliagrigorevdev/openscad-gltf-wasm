@@ -108,12 +108,14 @@ You can now define hierarchical animated parts. Use the `armature` root module t
 
 ```openscad
 armature(animations = [
-  // Format: ["BoneName", [ [time_in_sec, [rot_x, y, z], [trans_x, y, z]], ... ]]
-  ["Pendulum", [
-    [0.0, [0, 0, 0], [0, 0, 0]],
-    [1.0, [0, 45, 0], [0, 0, 0]],
-    [2.0, [0, -45, 0], [0, 0, 0]],
-    [3.0, [0, 0, 0], [0, 0, 0]]
+  ["Swing", [
+    // Format: ["BoneName", [ [time_in_sec, [rot_x, y, z], [trans_x, y, z]], ... ]]
+    ["Pendulum", [
+      [0.0, [0, 0, 0], [0, 0, 0]],
+      [1.0, [0, 45, 0], [0, 0, 0]],
+      [2.0, [0, -45, 0], [0, 0, 0]],
+      [3.0, [0, 0, 0], [0, 0, 0]]
+    ]]
   ]]
 ]) {
     bone(name="Pendulum", t=[0, 0, 10], r=[0, 0, 0]) {

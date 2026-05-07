@@ -80,12 +80,14 @@ export function generatePrompt(description, options = {}) {
 - Wrapping: Use the 'armature(animations=...)' module at the root to wrap all animated components.
 - Hierarchies: Use the 'bone(name="BoneName", t=[x,y,z], r=[x,y,z])' module to define hierarchical animated parts.
 - Auto-Unioning: Any child meshes (e.g., cube, cylinder, imported objects) placed directly inside an 'armature()' or 'bone()' node are automatically unioned together by the engine. Child bones remain separate nodes in the hierarchy.
-- Animation Data: The 'animations' property is an array of tracks defining keyframes for each bone. Format:
+- Animation Data: The 'animations' property is an array of named animation sequences. Each sequence contains an array of tracks defining keyframes for each bone. Format:
   animations = [
-    ["BoneName", [
-      [time_in_seconds, [rot_x, rot_y, rot_z], [trans_x, trans_y, trans_z]], // Translation is optional
-      [1.0, [0, 90, 0], [0, 5, 0]],
-      ...
+    ["AnimationName", [
+      ["BoneName", [
+        [time_in_seconds, [rot_x, rot_y, rot_z], [trans_x, trans_y, trans_z]], // Translation is optional
+        [1.0, [0, 90, 0], [0, 5, 0]],
+        ...
+      ]]
     ]]
   ];
 - Rotation Keyframes: Due to glTF Quaternion shortest-path interpolation, NEVER rotate more than 90 degrees between consecutive keyframes. To perform a full 360-degree rotation, you MUST manually subdivide it into 90-degree increments (e.g., 0, 90, 180, 270, 360).
@@ -93,17 +95,19 @@ export function generatePrompt(description, options = {}) {
 
 Example Animation Usage:
 anim_data = [
-  ["BaseSpinner", [
-    [0.0, [0, 0, 0]],
-    [1.0, [0, 0, 90]],
-    [2.0, [0, 0, 180]],
-    [3.0, [0, 0, 270]],
-    [4.0, [0, 0, 360]]
-  ]],
-  ["ChildSlider", [
-    [0.0, [0, 0, 0], [0, 0, 0]],
-    [2.0, [0, 0, 0], [0, 0, 10]],
-    [4.0, [0, 0, 0], [0, 0, 0]]
+  ["Action 1", [
+    ["BaseSpinner", [
+      [0.0, [0, 0, 0]],
+      [1.0, [0, 0, 90]],
+      [2.0, [0, 0, 180]],
+      [3.0, [0, 0, 270]],
+      [4.0, [0, 0, 360]]
+    ]],
+    ["ChildSlider", [
+      [0.0, [0, 0, 0], [0, 0, 0]],
+      [2.0, [0, 0, 0], [0, 0, 10]],
+      [4.0, [0, 0, 0], [0, 0, 0]]
+    ]]
   ]]
 ];
 
