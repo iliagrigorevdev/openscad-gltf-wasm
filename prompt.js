@@ -12,7 +12,7 @@ export function generatePrompt(description) {
 
   return `Generate an OpenSCAD script to design the following: ${description}.
 
-Please utilize extended color attributes, specifically including 'roughness', 'metalness', 'clearcoat', 'clearcoatRoughness', 'sheen', 'sheenColor', 'sheenRoughness', 'transmission', 'thickness', 'attenuationColor', 'attenuationDistance', 'ior', 'emissive', 'emissiveIntensity', 'specularColor', 'specularIntensity', 'iridescence', 'iridescenceIOR', 'anisotropy', and 'anisotropyRotation' parameters.
+Please utilize extended color attributes, specifically including 'roughness', 'metalness', 'clearcoat', 'clearcoatRoughness', 'sheen', 'sheenColor', 'sheenRoughness', 'transmission', 'thickness', 'attenuationColor', 'attenuationDistance', 'ior', 'emissive', 'emissiveIntensity', 'specularColor', 'specularIntensity', 'iridescence', and 'iridescenceIOR' parameters.
 
 Important PBR rules:
 - Metalness: For solid metallic materials (e.g., gold, steel), use metalness near 1.0. High metalness blocks light transmission. (Default: 0.0)
@@ -29,7 +29,6 @@ Important PBR rules:
 - Emissive & Emissive Intensity: Makes the material glow. Emissive is an RGB color vector, intensity is a float multiplier. (Defaults: [0.0, 0.0, 0.0] and 1.0)
 - Specular Color & Intensity: Overrides the default specular reflection. (Defaults: [1.0, 1.0, 1.0] and 1.0)
 - Iridescence & Iridescence IOR: Simulates thin-film interference like soap bubbles, oil spills, or pearlescent surfaces. (Defaults: 0.0 and 1.3)
-- Anisotropy & Rotation: Creates stretched directional highlights, essential for brushed metal, satin, or hair. Rotation is in radians. (Defaults: 0.0 and 0.0)
 
 Example Material Usage:
 // Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])
