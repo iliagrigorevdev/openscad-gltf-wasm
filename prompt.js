@@ -89,7 +89,37 @@ export function generatePrompt(description, options = {}) {
     ]]
   ];
 - Rotation Keyframes: Due to glTF Quaternion shortest-path interpolation, NEVER rotate more than 90 degrees between consecutive keyframes. To perform a full 360-degree rotation, you MUST manually subdivide it into 90-degree increments (e.g., 0, 90, 180, 270, 360).
-- Translational Animation: If you want a bone to move translationally, provide the [trans_x, trans_y, trans_z] array in the keyframes. If omitted, the bone defaults to its resting position.`;
+- Translational Animation: If you want a bone to move translationally, provide the [trans_x, trans_y, trans_z] array in the keyframes. If omitted, the bone defaults to its resting position.
+
+Example Animation Usage:
+anim_data = [
+  ["BaseSpinner", [
+    [0.0, [0, 0, 0]],
+    [1.0, [0, 0, 90]],
+    [2.0, [0, 0, 180]],
+    [3.0, [0, 0, 270]],
+    [4.0, [0, 0, 360]]
+  ]],
+  ["ChildSlider", [
+    [0.0, [0, 0, 0], [0, 0, 0]],
+    [2.0, [0, 0, 0], [0, 0, 10]],
+    [4.0, [0, 0, 0], [0, 0, 0]]
+  ]]
+];
+
+armature(animations=anim_data) {
+  // Root bone
+  bone(name="BaseSpinner", t=[0, 0, 0], r=[0, 0, 0]) {
+    // Mesh attached to BaseSpinner
+    color([0.2, 0.5, 0.8]) cube([10, 10, 2], center=true);
+
+    // Nested child bone (inherits parent's transform)
+    bone(name="ChildSlider", t=[0, 0, 2], r=[0, 0, 0]) {
+      // Mesh attached to ChildSlider
+      color([0.8, 0.2, 0.2]) cylinder(h=5, r=2);
+    }
+  }
+}`;
   }
 
   return prompt;
