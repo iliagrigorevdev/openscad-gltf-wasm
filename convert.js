@@ -3,10 +3,15 @@ import OpenScad from "./openscad.js";
 /**
  * Converts SCAD code to a GLTF/GLB Uint8Array using the OpenSCAD WASM compiler.
  * @param {string} scadCode - The OpenSCAD code to compile.
- * @param {string} [wasmUrl] - Optional URL to the openscad.wasm file, useful for bundlers or extensions.
- * @returns {Promise<Uint8Array>} The resulting GLB data.
+ * @param {Object} [options={}] - Options object.
+ * @param {string} [options.wasmUrl] - Optional URL to the openscad.wasm file, useful for bundlers or extensions.
+ * @param {boolean} [options.binary=true] - Whether to compile to a binary GLB (true) or normal GLTF (false).
+ * @returns {Promise<Uint8Array>} The resulting GLB/GLTF data.
  */
-export async function convertScadToGltf(scadCode, wasmUrl) {
+export async function convertScadToGltf(scadCode, options = {}) {
+  const wasmUrl = options.wasmUrl;
+  const isBinary = options.binary !== undefined ? options.binary : true;
+
   // Initialize a NEW instance every time because callMain terminates the WASM environment
   const instance = await OpenScad({
     noInitialRun: true,
@@ -21,10 +26,12 @@ export async function convertScadToGltf(scadCode, wasmUrl) {
   // Write the input SCAD code to Emscripten's virtual file system
   instance.FS.writeFile("/input.scad", scadCode);
 
-  // Compile to GLB
-  instance.callMain(["/input.scad", "-o", "output.glb", "--enable=lazy-union"]);
+  // Compile to GLTF/GLB
+  const outputExt = isBinary ? "glb" : "gltf";
+  const outputName = `/output.${outputExt}`;
+  instance.callMain(["/input.scad", "-o", outputName, "--enable=lazy-union"]);
 
-  // Read the resulting GLB byte array back from the virtual file system
-  const outputArray = instance.FS.readFile("/output.glb");
+  // Read the resulting byte array back from the virtual file system
+  const outputArray = instance.FS.readFile(outputName);
   return outputArray;
 }

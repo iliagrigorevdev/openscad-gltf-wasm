@@ -63,7 +63,7 @@ If you are using this in a browser, you may need to provide the URL to the WASM 
 // Import the WASM file URL (syntax depends on your bundler, e.g., Vite)
 import wasmUrl from "openscad-gltf-wasm/openscad.wasm?url";
 
-const glbData = await convertScadToGltf(scadCode, wasmUrl);
+const glbData = await convertScadToGltf(scadCode, { wasmUrl });
 ```
 
 ---
