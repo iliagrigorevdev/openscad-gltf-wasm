@@ -21,7 +21,7 @@ This WASM module was generated from the `gltf` branch of the forked [openscad](h
 ## Installation
 
 ```bash
-npm install openscad-gltf-wasm
+npm install github:iliagrigorevdev/openscad-gltf-wasm
 ```
 
 ---
