@@ -30,9 +30,29 @@ npm install github:iliagrigorevdev/openscad-gltf-wasm
 
 The package provides a convenient `convert.js` wrapper to handle the Emscripten WASM lifecycle and virtual file system.
 
+_Note: Because the underlying WASM loader was compiled for the web, it expects the modern `fetch()` API. In Node.js, we must provide the absolute path to the `.wasm` file and briefly polyfill `fetch` so it can read local files from disk._
+
 ```javascript
 import { convertScadToGltf } from "openscad-gltf-wasm/convert";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// 1. Locate the WASM file inside node_modules
+const wasmPath = path.resolve("node_modules/openscad-gltf-wasm/openscad.wasm");
+
+// 2. Mock fetch to allow the WASM loader to read local files in Node.js
+global.fetch = async (url) => {
+  const normalizedPath = url.toString().startsWith("file://")
+    ? fileURLToPath(url.toString())
+    : url.toString();
+
+  const buffer = fs.readFileSync(normalizedPath);
+  return new Response(buffer, {
+    status: 200,
+    headers: { "Content-Type": "application/wasm" }
+  });
+};
 
 const scadCode = `
   color("gold", metalness=1.0, roughness=0.2)
@@ -41,8 +61,10 @@ const scadCode = `
 
 async function buildModel() {
   try {
-    // Compile SCAD to a GLB Uint8Array
-    const glbData = await convertScadToGltf(scadCode);
+    // 3. Compile SCAD to a GLB Uint8Array
+    const glbData = await convertScadToGltf(scadCode, {
+      wasmUrl: \`file://\${wasmPath}\`
+    });
 
     // Save to disk (or send to a client, load into Three.js, etc.)
     fs.writeFileSync("output.glb", glbData);
@@ -57,11 +79,14 @@ buildModel();
 
 ### Using in Web Bundlers (Webpack / Vite)
 
-If you are using this in a browser, you may need to provide the URL to the WASM file so the Emscripten loader can find it:
+If you are using this in a browser, you don't need to mock `fetch`. You just need to provide the URL to the `.wasm` file so the bundler and Emscripten loader can fetch it over HTTP:
 
 ```javascript
-// Import the WASM file URL (syntax depends on your bundler, e.g., Vite)
+// Import the WASM file URL (syntax depends on your bundler, e.g., Vite uses ?url)
 import wasmUrl from "openscad-gltf-wasm/openscad.wasm?url";
+import { convertScadToGltf } from "openscad-gltf-wasm/convert";
+
+const scadCode = `cylinder(h=20, r=5);`;
 
 const glbData = await convertScadToGltf(scadCode, { wasmUrl });
 ```
