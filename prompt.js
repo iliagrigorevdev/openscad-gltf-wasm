@@ -80,7 +80,8 @@ export function generatePrompt(description, options = {}) {
     prompt += `\n\nImportant Animation rules:
 - Wrapping: Use the 'armature(animations=...)' module at the root to wrap all animated components.
 - Hierarchies: Use the 'bone(name="BoneName", t=[x,y,z], r=[x,y,z])' module to define hierarchical animated parts.
-- Auto-Unioning: Any child meshes (e.g., cube, cylinder, imported objects) placed directly inside an 'armature()' or 'bone()' node are automatically unioned together by the engine. Child bones remain separate nodes in the hierarchy.
+- Envelope Skinning (Soft Binding): Any child meshes placed DIRECTLY inside an 'armature()' (but NOT inside a 'bone()') are automatically softly weighted to all bones in that armature using an inverse-distance algorithm. This allows continuous meshes to bend smoothly!
+- Rigid Binding: Any meshes placed inside a 'bone()' node are rigidly attached to that specific bone and will not deform softly.
 - Morph Targets (Blend Shapes): Use the 'morph(name="MorphName")' module. The FIRST child is the base mesh. ANY SUBSEQUENT children are targets. CRITICAL: Base and target meshes MUST have exact identical vertex topologies (e.g., use the same base primitive but transformed using scale() or translate()).
 - Animation Data: The 'animations' property is an array of named animation sequences. Each sequence contains an array of tracks defining keyframes for each bone/morph. Format:
   animations = [
@@ -124,6 +125,9 @@ anim_data = [
 ];
 
 armature(animations=anim_data) {
+  // Soft-bound mesh (bends smoothly between bones)
+  color("pink") cylinder(h=10, r=2, $fn=20);
+
   // Root bone
   bone(name="BaseSpinner", t=[0, 0, 0], r=[0, 0, 0]) {
     // Mesh attached to BaseSpinner
