@@ -20,6 +20,7 @@ export function generatePrompt(description, options = {}) {
     specular: options.specular ?? true,
     iridescence: options.iridescence ?? true,
     animation: options.animation ?? true,
+    weights: options.weights ?? true,
   };
 
   let prompt = `Generate an OpenSCAD script to design the following: ${description}.`;
@@ -78,7 +79,11 @@ export function generatePrompt(description, options = {}) {
   if (opts.animation) {
     prompt += `\n\nImportant Animation rules:
 - Wrapping: Use the 'armature(animations=...)' module at the root to wrap all animated components.
-- Hierarchies: Use the 'bone(name="BoneName", t=[x,y,z], r=[x,y,z])' module to define hierarchical animated parts.
+- Hierarchies: Use the 'bone(name="BoneName", t=[x,y,z], r=[x,y,z])' module to define hierarchical animated parts.`;
+    if (opts.weights) {
+      prompt += `\n- Bone Weights: Use 'weight(bones=["BoneName"], weights=[1.0])' to explicitly bind child meshes to bones with per-vertex weights.`;
+    }
+    prompt += `
 - Auto-Unioning: Any child meshes (e.g., cube, cylinder, imported objects) placed directly inside an 'armature()' or 'bone()' node are automatically unioned together by the engine. Child bones remain separate nodes in the hierarchy.
 - Animation Data: The 'animations' property is an array of named animation sequences. Each sequence contains an array of tracks defining keyframes for each bone. Format:
   animations = [
@@ -111,15 +116,23 @@ anim_data = [
   ]]
 ];
 
-armature(animations=anim_data) {
+armature(animations=anim_data) {`;
+    if (opts.weights) {
+      prompt += `
+  // Skinned mesh bound to multiple bones
+  weight(bones=["BaseSpinner", "ChildSlider"], weights=[0.5, 0.5]) {
+    color([0.2, 0.8, 0.2]) translate([0,0,1]) cylinder(h=2, r=2.5, center=true);
+  }`;
+    }
+    prompt += `
   // Root bone
   bone(name="BaseSpinner", t=[0, 0, 0], r=[0, 0, 0]) {
-    // Mesh attached to BaseSpinner
+    // Rigid mesh attached to BaseSpinner
     color([0.2, 0.5, 0.8]) cube([10, 10, 2], center=true);
 
     // Nested child bone (inherits parent's transform)
     bone(name="ChildSlider", t=[0, 0, 2], r=[0, 0, 0]) {
-      // Mesh attached to ChildSlider
+      // Rigid mesh attached to ChildSlider
       color([0.8, 0.2, 0.2]) cylinder(h=5, r=2);
     }
   }
