@@ -20,6 +20,7 @@ export function generatePrompt(description, options = {}) {
     specular: options.specular ?? true,
     iridescence: options.iridescence ?? true,
     animation: options.animation ?? true,
+    morph: options.morph ?? true,
   };
 
   let prompt = `Generate an OpenSCAD script to design the following: ${description}.`;
@@ -75,17 +76,23 @@ export function generatePrompt(description, options = {}) {
     prompt += `\n\nExample Material Usage:\n// Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])\ncolor([0.2, 0.2, 0.2], alpha=1.0, metalness=1.0, roughness=0.3, iridescence=1.0, emissive=[0.0, 0.5, 1.0], emissiveIntensity=2.0)\n  cube([10, 10, 10]);`;
   }
 
-  if (opts.animation) {
+  if (opts.animation || opts.morph) {
     prompt += `\n\nImportant Animation rules:
 - Wrapping: Use the 'armature(animations=...)' module at the root to wrap all animated components.
 - Hierarchies: Use the 'bone(name="BoneName", t=[x,y,z], r=[x,y,z])' module to define hierarchical animated parts.
 - Auto-Unioning: Any child meshes (e.g., cube, cylinder, imported objects) placed directly inside an 'armature()' or 'bone()' node are automatically unioned together by the engine. Child bones remain separate nodes in the hierarchy.
-- Animation Data: The 'animations' property is an array of named animation sequences. Each sequence contains an array of tracks defining keyframes for each bone. Format:
+- Morph Targets (Blend Shapes): Use the 'morph(name="MorphName")' module. The FIRST child is the base mesh. ANY SUBSEQUENT children are targets. CRITICAL: Base and target meshes MUST have exact identical vertex topologies (e.g., use the same base primitive but transformed using scale() or translate()).
+- Animation Data: The 'animations' property is an array of named animation sequences. Each sequence contains an array of tracks defining keyframes for each bone/morph. Format:
   animations = [
     ["AnimationName", [
       ["BoneName", [
         [time_in_seconds, [rot_x, rot_y, rot_z], [trans_x, trans_y, trans_z]], // Translation is optional
         [1.0, [0, 90, 0], [0, 5, 0]],
+        ...
+      ]],
+      ["MorphName", [
+        [time_in_seconds, [weight_target_1, weight_target_2]],
+        [1.0, [1.0, 0.0]],
         ...
       ]]
     ]]
@@ -107,6 +114,11 @@ anim_data = [
       [0.0, [0, 0, 0], [0, 0, 0]],
       [2.0, [0, 0, 0], [0, 0, 10]],
       [4.0, [0, 0, 0], [0, 0, 0]]
+    ]],
+    ["JellyMorph", [
+      [0.0, [0.0]],
+      [2.0, [1.0]],
+      [4.0, [0.0]]
     ]]
   ]]
 ];
@@ -121,6 +133,13 @@ armature(animations=anim_data) {
     bone(name="ChildSlider", t=[0, 0, 2], r=[0, 0, 0]) {
       // Mesh attached to ChildSlider
       color([0.8, 0.2, 0.2]) cylinder(h=5, r=2);
+    }
+
+    // Morph attached to BaseSpinner
+    translate([10, 0, 0])
+    morph(name="JellyMorph") {
+        color("green") sphere(r=2); // Base
+        scale([1, 1, 2]) sphere(r=2); // Target 1 (stretched)
     }
   }
 }`;
