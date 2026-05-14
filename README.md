@@ -11,7 +11,7 @@ This WASM module was generated from the `gltf` branch of the forked [openscad](h
 ## Features
 
 - **Direct SCAD to GLB conversion:** Compile geometry directly to web-ready binary glTF.
-- **Extended PBR Material Support:** Native extensions to the OpenSCAD `color()` module supporting `metalness`, `roughness`, `transmission` (glass), `clearcoat`, `sheen`, `ior`, `emissive`, `specular`, and `iridescence`.
+- **Extended PBR Material Support:** Native extensions to the OpenSCAD `color()` module supporting `metalness`, `roughness`, `transmission` (glass), `clearcoat`, `sheen`, `ior`, `emissive`, `specular`, `iridescence`, and `autoSmoothAngle`.
 - **Skeletal Animation:** Define animated armatures and bones directly within your `.scad` files.
 - **True Skeletal Skinning:** Exports absolute world transforms and properly bound animation tracks.
 - **LLM Friendly:** Includes a built-in prompt generator (`prompt.js`) to help AI models (like Gemini or Claude) write compatible OpenSCAD scripts utilizing the new features.
@@ -121,7 +121,8 @@ color(
     specularColor = [1.0, 1.0, 1.0], // Tint for specular highlights
     specularIntensity = 1.0,    // Strength of specular highlights
     iridescence = 0.0,          // Thin-film interference effect (soap bubble)
-    iridescenceIOR = 1.3
+    iridescenceIOR = 1.3,
+    autoSmoothAngle = 30.0      // Generates smooth vertex normals below this angle threshold
 ) {
     cylinder(h=10, r=5);
 }

@@ -19,6 +19,7 @@ export function generatePrompt(description, options = {}) {
     emissive: options.emissive ?? true,
     specular: options.specular ?? true,
     iridescence: options.iridescence ?? true,
+    autoSmoothAngle: options.autoSmoothAngle ?? true,
     animation: options.animation ?? true,
   };
 
@@ -26,6 +27,7 @@ export function generatePrompt(description, options = {}) {
 
   let attrs = [];
   if (opts.basic) attrs.push("'roughness'", "'metalness'");
+  if (opts.autoSmoothAngle) attrs.push("'autoSmoothAngle'");
   if (opts.clearcoat) attrs.push("'clearcoat'", "'clearcoatRoughness'");
   if (opts.sheen) attrs.push("'sheen'", "'sheenColor'", "'sheenRoughness'");
   if (opts.transmission)
@@ -71,8 +73,11 @@ export function generatePrompt(description, options = {}) {
     if (opts.iridescence) {
       prompt += `\n- Iridescence & Iridescence IOR: Simulates thin-film interference like soap bubbles, oil spills, or pearlescent surfaces. (Defaults: 0.0 and 1.3)`;
     }
+    if (opts.autoSmoothAngle) {
+      prompt += `\n- Auto Smooth Angle: Generates smooth vertex normals for adjoining faces with an angle difference less than this value (in degrees). Use > 0 (e.g., 30 or 45) for curved/smooth surfaces, 0.0 for flat shading. (Default: 0.0)`;
+    }
 
-    prompt += `\n\nExample Material Usage:\n// Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])\ncolor([0.2, 0.2, 0.2], alpha=1.0, metalness=1.0, roughness=0.3, iridescence=1.0, emissive=[0.0, 0.5, 1.0], emissiveIntensity=2.0)\n  cube([10, 10, 10]);`;
+    prompt += `\n\nExample Material Usage:\n// Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])\ncolor([0.2, 0.2, 0.2], alpha=1.0, metalness=1.0, roughness=0.3, iridescence=1.0, emissive=[0.0, 0.5, 1.0], emissiveIntensity=2.0, autoSmoothAngle=45.0)\n  cube([10, 10, 10]);`;
   }
 
   if (opts.animation) {
