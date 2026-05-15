@@ -15,6 +15,7 @@ This WASM module was generated from the `gltf` branch of the forked [openscad](h
 - **Skeletal Animation:** Define animated armatures and bones directly within your `.scad` files.
 - **True Skeletal Skinning:** Exports absolute world transforms and properly bound animation tracks.
 - **LLM Friendly:** Includes a built-in prompt generator (`prompt.js`) to help AI models (like Gemini or Claude) write compatible OpenSCAD scripts utilizing the new features.
+- **Local API Server:** Bundled `scad-serve` CLI utility to manage local `.scad` files remotely via REST API.
 
 ---
 
@@ -90,6 +91,41 @@ const scadCode = `cylinder(h=20, r=5);`;
 
 const glbData = await convertScadToGltf(scadCode, { wasmUrl });
 ```
+
+---
+
+## Local File Management (`scad-serve`)
+
+If you are building a web IDE or a generative UI that needs to read, write, and manage `.scad` files on your local filesystem, this package includes a lightweight Express API server called `scad-serve`.
+
+It strictly operates **only** on the `.scad` files in the directory where the command is run, preventing arbitrary file traversal.
+
+**Start the server using one of these options:**
+
+- **Option A: Run directly (No installation)**
+  ```bash
+  npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-serve
+  ```
+- **Option B: If installed as a dependency**
+  ```bash
+  npx scad-serve
+  ```
+
+**Optional Arguments:**
+
+- `--port 3000`: Set a custom port (default is 3000).
+
+**Available Endpoints:**
+
+- `GET /api/scads`
+  - Lists all `.scad` files in the current working directory.
+- `GET /api/scads/:filename`
+  - Retrieves the text content of a specific `.scad` file.
+- `POST /api/scads`
+  - Creates or updates a `.scad` file.
+  - **Body Payload:** `{ "filename": "MyModel.scad", "content": "cube(10);" }`
+- `DELETE /api/scads/:filename`
+  - Deletes a `.scad` file from the directory.
 
 ---
 
