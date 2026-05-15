@@ -129,6 +129,18 @@ It strictly operates **only** on the `.scad` files in the directory where the co
 
 ---
 
+## 🎮 Godot Engine Integration
+
+This repository includes an official **Godot 4.x Importer Addon** located in the [`/godot`](./godot) directory.
+
+The addon allows you to drag-and-drop `.scad` files directly into your Godot project. It uses this WASM compiler under the hood to transform scripts into 3D scenes automatically.
+
+- **Features:** Supports PBR Materials and Skeletal Animations inside the Godot Editor.
+- **License:** The Godot Addon is licensed under **MIT** (see the `/godot` folder for details).
+- **Setup:** Simply copy the `addons/scad_importer` folder to your project and enable it in Project Settings.
+
+[View Godot Addon Documentation & Setup](./godot/README.md)
+
 ## Extended OpenSCAD Syntax
 
 This custom fork introduces new syntax not found in standard OpenSCAD.
