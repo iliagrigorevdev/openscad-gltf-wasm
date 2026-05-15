@@ -1,0 +1,193 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: #333;
+  display: flex;
+  font-family: sans-serif;
+}
+
+/* History Panel Styles */
+#history-panel {
+  width: 220px;
+  height: 100vh;
+  background: #222;
+  border-right: 1px solid #444;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  transition: width 0.3s;
+  flex-shrink: 0;
+}
+#history-panel.collapsed {
+  width: 0;
+  border-right: none;
+  overflow: hidden;
+}
+#history-header {
+  padding: 10px;
+  background: #111;
+  font-weight: bold;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  white-space: nowrap;
+}
+#history-toggle {
+  background: #444;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+#history-toggle:hover {
+  background: #666;
+}
+#history-list {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+}
+.history-item {
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.history-item:hover {
+  background: #444;
+}
+.history-time {
+  font-size: 10px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+.history-snippet {
+  font-size: 11px;
+  font-family: monospace;
+  color: #0f0;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+/* Editor Panel Styles */
+#editor-panel {
+  width: 300px;
+  height: 100vh;
+  background: #1e1e1e;
+  border-right: 1px solid #444;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s;
+  flex-shrink: 0;
+}
+#editor-panel.collapsed {
+  width: 0;
+  border-right: none;
+  overflow: hidden;
+}
+#editor-header {
+  padding: 10px;
+  background: #111;
+  font-weight: bold;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  white-space: nowrap;
+}
+#editor-toggle {
+  background: #444;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+#editor-toggle:hover {
+  background: #666;
+}
+#editor {
+  flex-grow: 1;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 10px;
+  border: none;
+  resize: none;
+  outline: none;
+  white-space: pre;
+  overflow: auto;
+  line-height: 1.4;
+}
+
+/* Viewer Container Styles */
+#viewer-container {
+  flex-grow: 1;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  min-width: 0;
+  background: #1e1e1e;
+}
+#viewer {
+  width: 100%;
+  height: 100%;
+}
+#status {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 10;
+}
+#expand-toggle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #555;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: none;
+}
+#expand-toggle:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+#top-right-buttons {
+  position: absolute;
+  top: 10px;
+  right: 40px; /* Offset to avoid overlapping the container's close button */
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+}
+#top-right-buttons button,
+#top-right-buttons label {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #555;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  gap: 6px;
+  user-select: none;
+}
+#top-right-buttons button:hover,
+#top-right-buttons label:hover {
+  background: rgba(0, 0, 0, 0.8);
+}

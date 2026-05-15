@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="preview.css" />
+  </head>
+  <body>
+    <div id="history-panel">
+      <div id="history-header">
+        <span>SCAD History</span>
+        <button id="history-toggle">◀</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+    <div id="editor-panel">
+      <div id="editor-header">
+        <span>Editor</span>
+        <button id="editor-toggle">◀</button>
+      </div>
+      <textarea id="editor" spellcheck="false"></textarea>
+    </div>
+
+    <div id="viewer-container">
+      <button id="expand-toggle">▶ Expand Panels</button>
+      <div id="top-right-buttons">
+        <label>
+          <input type="checkbox" id="path-tracing-cb" /> Path
+          Tracing
+        </label>
+        <label>
+          <input type="checkbox" id="auto-smooth-cb" /> Auto
+          Smooth
+        </label>
+        <button id="download-scad-btn">⬇ Download SCAD</button>
+        <button id="export-gltf-btn">⬇ Export GLTF</button>
+      </div>
+      <div id="status">Waiting for code...</div>
+      <div id="viewer"></div>
+    </div>
+
+    <script type="module" src="preview.js"></script>
+  </body>
+</html>
