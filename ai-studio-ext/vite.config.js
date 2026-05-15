@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import { copyFileSync, cpSync } from "fs";
+import { copyFileSync } from "fs";
 
 export default defineConfig({
   build: {
@@ -24,11 +24,6 @@ export default defineConfig({
       writeBundle() {
         copyFileSync("manifest.json", "dist/manifest.json");
         copyFileSync("content.css", "dist/content.css");
-        try {
-          cpSync("res", "dist/res", { recursive: true });
-        } catch (e) {
-          console.warn("No res directory to copy");
-        }
       },
     },
   ],

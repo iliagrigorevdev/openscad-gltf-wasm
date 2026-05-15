@@ -59,8 +59,7 @@ difference() {
     cube([20, 20, 20], center=true);
     sphere(r=12);
 }
-    </textarea
-      >
+      </textarea>
       <button id="render-btn">Render 3D</button>
     </div>
 
@@ -72,22 +71,8 @@ difference() {
       const iframe = document.getElementById("preview-frame");
       const scadCode = document.getElementById("scad-code");
 
-      // 1. Setup a local history array (hydrated from localStorage so it survives reloads)
-      let scadsHistory = JSON.parse(
-        localStorage.getItem("scad_history") || "[]",
-      );
-
-      // 2. Initialize history inside the iframe as soon as it loads
-      iframe.onload = () => {
-        iframe.contentWindow.postMessage(
-          { type: "INIT_HISTORY", scads: scadsHistory },
-          "*",
-        );
-      };
-
       renderBtn.onclick = () => {
         const code = scadCode.value.trim();
-
         // Send the code to the iframe to render
         iframe.contentWindow.postMessage(
           {
@@ -96,26 +81,6 @@ difference() {
           },
           "*",
         );
-
-        // 3. Save to history if the code is unique
-        if (code && !scadsHistory.find((item) => item.code === code)) {
-          scadsHistory.push({
-            code: code,
-            timestamp: Date.now(),
-          });
-
-          // Persist it locally
-          localStorage.setItem("scad_history", JSON.stringify(scadsHistory));
-
-          // Send an update event so the iframe updates the history side-panel
-          iframe.contentWindow.postMessage(
-            {
-              type: "HISTORY_UPDATED",
-              scads: scadsHistory,
-            },
-            "*",
-          );
-        }
       };
     </script>
   </body>

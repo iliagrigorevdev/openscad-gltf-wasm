@@ -16,8 +16,7 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  /* Further expanded to accommodate editor alongside history */
-  width: 850px;
+  width: 600px;
   height: 550px;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
