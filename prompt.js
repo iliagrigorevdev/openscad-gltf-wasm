@@ -80,6 +80,9 @@ export function generatePrompt(description, options = {}) {
     prompt += `\n\nExample Material Usage:\n// Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])\ncolor([0.2, 0.2, 0.2], alpha=1.0, metalness=1.0, roughness=0.3, iridescence=1.0, emissive=[0.0, 0.5, 1.0], emissiveIntensity=2.0, autoSmoothAngle=45.0)\n  cube([10, 10, 10]);`;
   }
 
+  prompt += `\n\nImportant Geometry rules:
+- The compiler runs with "lazy-union" enabled by default. This means top-level objects, module children, and items inside loops ('for') or conditionals ('if') are NOT implicitly boolean-unioned together. They are evaluated and exported as separate discrete meshes.`;
+
   if (opts.animation) {
     prompt += `\n\nImportant Animation rules:
 - Wrapping: Use the 'armature(animations=...)' module at the root to wrap all animated components.
