@@ -22,7 +22,7 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 
     args.append("--yes")
     args.append("-p")
-    args.append("github:iliagrigorevdev/openscad-gltf-wasm#godot")
+    args.append("github:iliagrigorevdev/openscad-gltf-wasm")
     args.append("scad-convert")
     args.append(global_source)
     args.append(temp_glb_path)
