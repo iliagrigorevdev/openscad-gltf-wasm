@@ -213,7 +213,7 @@ async function compileAndRender(scadCode) {
     statusEl.innerText = "Loading Scene...";
     await renderGLTF(gltfData);
 
-    statusEl.innerText = "";
+    statusEl.textContent = "";
   } catch (e) {
     console.error(e);
     statusEl.innerText = "Compilation Error";
