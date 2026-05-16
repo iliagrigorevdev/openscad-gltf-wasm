@@ -21,6 +21,7 @@ export function generatePrompt(description, options = {}) {
     iridescence: options.iridescence ?? true,
     autoSmoothAngle: options.autoSmoothAngle ?? true,
     animation: options.animation ?? true,
+    lazyUnion: options.lazyUnion ?? true,
   };
 
   let prompt = `Generate an OpenSCAD script to design the following: ${description}.`;
@@ -80,8 +81,9 @@ export function generatePrompt(description, options = {}) {
     prompt += `\n\nExample Material Usage:\n// Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])\ncolor([0.2, 0.2, 0.2], alpha=1.0, metalness=1.0, roughness=0.3, iridescence=1.0, emissive=[0.0, 0.5, 1.0], emissiveIntensity=2.0, autoSmoothAngle=45.0)\n  cube([10, 10, 10]);`;
   }
 
-  prompt += `\n\nImportant Geometry rules:
-- The compiler runs with "lazy-union" enabled by default. This means top-level objects, module children, and items inside loops ('for') or conditionals ('if') are NOT implicitly boolean-unioned together. They are evaluated and exported as separate discrete meshes.`;
+  if (opts.lazyUnion) {
+    prompt += `\n\nImportant Geometry rules:\n- The compiler runs with "lazy-union" enabled. This means top-level objects, module children, and items inside loops ('for') or conditionals ('if') are NOT implicitly boolean-unioned together. They are evaluated and exported as separate discrete meshes.`;
+  }
 
   if (opts.animation) {
     prompt += `\n\nImportant Animation rules:

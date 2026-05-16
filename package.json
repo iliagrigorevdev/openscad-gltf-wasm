@@ -1,6 +1,6 @@
 {
   "name": "openscad-gltf-wasm",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "type": "module",
   "main": "openscad.js",
   "bin": {
