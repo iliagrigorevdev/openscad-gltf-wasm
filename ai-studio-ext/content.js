@@ -13,7 +13,7 @@ const observer = new MutationObserver(() => {
     const btn = document.createElement("button");
     btn.innerText = "👀 Preview 3D";
     btn.className = "scad-preview-btn";
-    btn.style.margin = "10px 0 10px 15px";
+    btn.style.margin = "0 0 10px 15px";
 
     btn.onpointerdown = (e) => e.stopPropagation();
 
@@ -29,8 +29,7 @@ const observer = new MutationObserver(() => {
 
     const preElement = block.querySelector("pre");
     if (preElement) {
-      // Insert AFTER the pre element so it stays at the bottom
-      preElement.parentNode.insertBefore(btn, preElement.nextSibling);
+      preElement.parentNode.insertBefore(btn, preElement);
     } else {
       block.appendChild(btn);
     }
