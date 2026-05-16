@@ -15,7 +15,13 @@
     "./prompt.js": "./prompt.js",
     "./openscad.wasm": "./openscad.wasm"
   },
+  "scripts": {
+    "format": "prettier --write ."
+  },
   "dependencies": {
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "prettier": "3.8.3"
   }
 }
