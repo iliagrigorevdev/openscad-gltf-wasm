@@ -48,7 +48,7 @@ function injectPromptButton() {
 
   const btn = document.createElement("button");
   btn.id = "scad-prompt-btn";
-  btn.innerText = "✨ SCAD Prompt";
+  btn.innerText = "✨ SCAD";
   btn.className = "scad-prompt-btn";
 
   btn.onclick = (e) => {
