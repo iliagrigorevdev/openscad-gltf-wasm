@@ -9,6 +9,7 @@ const viewerEl = document.getElementById("viewer");
 const statusEl = document.getElementById("status");
 const filenameInput = document.getElementById("filename-input");
 const saveBtn = document.getElementById("save-btn");
+const openEditorBtn = document.getElementById("open-editor-btn");
 
 let currentMesh = null;
 let latestScadCode = "";
@@ -44,13 +45,13 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.1;
 
-// --- Add Room Environment for IBL (Image-Based Lighting) ---
+// --- Add Room Environment for IBL ---
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
 scene.environment = pmremGenerator.fromScene(
   new RoomEnvironment(),
   0.04,
 ).texture;
-scene.environmentIntensity = 0.8; // Dim the environment reflections/lighting
+scene.environmentIntensity = 0.8;
 
 // Environment Helpers
 const floorGeo = new THREE.PlaneGeometry(2000, 2000);
@@ -64,11 +65,7 @@ floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// Standard Lights Setup
-// NOTE: AmbientLight was removed because RoomEnvironment provides global ambient lighting.
-
-// Kept purely for casting distinct shadows
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.6); // Reduced intensity
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.width = 2048;
 dirLight.shadow.mapSize.height = 2048;
@@ -235,12 +232,10 @@ window.addEventListener("message", async (event) => {
   if (event.data.type === "RENDER_SCAD") {
     latestScadCode = event.data.code;
 
-    // Parse model name from SCAD comment
     const nameMatch = latestScadCode.match(
       /\/\*\s*Model Name:\s*(.*?)\s*\*\//i,
     );
     if (nameMatch && nameMatch[1]) {
-      // Sanitize the text to be a safe filename
       let extractedName = nameMatch[1]
         .trim()
         .replace(/\s+/g, "_")
@@ -269,13 +264,10 @@ saveBtn.addEventListener("click", async () => {
     saveBtn.innerText = "Checking...";
     saveBtn.disabled = true;
 
-    // 1. Fetch file list to check if it exists
     const res = await fetch(`${backendUrl}/api/scads`);
     if (!res.ok) throw new Error("Could not reach scad-serve.");
 
     const data = await res.json();
-
-    // Backend appends .scad, so we must check against that exact name
     const checkFilename = filename.toLowerCase().endsWith(".scad")
       ? filename
       : `${filename}.scad`;
@@ -294,7 +286,6 @@ saveBtn.addEventListener("click", async () => {
 
     saveBtn.innerText = "Saving...";
 
-    // 2. Save the file
     const saveRes = await fetch(`${backendUrl}/api/scads`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -316,5 +307,62 @@ saveBtn.addEventListener("click", async () => {
     alert("Error saving file: " + err.message);
     saveBtn.innerText = "Save";
     saveBtn.disabled = false;
+  }
+});
+
+// --- Edit Functionality (Share to External Viewer) ---
+async function encodeCode(code) {
+  try {
+    if (typeof CompressionStream !== "undefined") {
+      const stream = new Blob([code])
+        .stream()
+        .pipeThrough(new CompressionStream("deflate-raw"));
+      const buffer = await new Response(stream).arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      let binary = "";
+      for (let i = 0; i < bytes.length; i++)
+        binary += String.fromCharCode(bytes[i]);
+      return (
+        "c" +
+        btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
+      );
+    }
+  } catch (e) {
+    console.warn("CompressionStream failed, falling back", e);
+  }
+  return (
+    "u" +
+    btoa(unescape(encodeURIComponent(code)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "")
+  );
+}
+
+openEditorBtn.addEventListener("click", async () => {
+  if (!latestScadCode) {
+    alert("No model loaded to open.");
+    return;
+  }
+
+  try {
+    openEditorBtn.disabled = true;
+    openEditorBtn.innerText = "Preparing...";
+
+    const hash = await encodeCode(latestScadCode);
+    const url = `https://iliagrigorevdev.github.io/openscad-gltf-viewer/#${hash}`;
+
+    window.open(url, "_blank");
+
+    openEditorBtn.innerText = "✅ Opened!";
+    setTimeout(() => {
+      openEditorBtn.innerText = "Edit";
+      openEditorBtn.disabled = false;
+    }, 2000);
+  } catch (err) {
+    console.error("Error creating editor link", err);
+    alert("Error creating editor link: " + err.message);
+    openEditorBtn.innerText = "Edit";
+    openEditorBtn.disabled = false;
   }
 });
