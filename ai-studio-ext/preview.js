@@ -234,6 +234,22 @@ async function compileAndRender(scadCode) {
 window.addEventListener("message", async (event) => {
   if (event.data.type === "RENDER_SCAD") {
     latestScadCode = event.data.code;
+
+    // Parse model name from SCAD comment
+    const nameMatch = latestScadCode.match(
+      /\/\*\s*Model Name:\s*(.*?)\s*\*\//i,
+    );
+    if (nameMatch && nameMatch[1]) {
+      // Sanitize the text to be a safe filename
+      let extractedName = nameMatch[1]
+        .trim()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_-]/g, "");
+      if (extractedName) {
+        filenameInput.value = extractedName;
+      }
+    }
+
     await compileAndRender(event.data.code);
   }
 });
