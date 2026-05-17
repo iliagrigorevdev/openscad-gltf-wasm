@@ -10,6 +10,7 @@ Powered by WebAssembly and Three.js, it translates OpenSCAD code to GLB on the f
 - **Client-Side Compilation:** Uses [`openscad-gltf-wasm`](https://github.com/iliagrigorevdev/openscad-gltf-wasm) to securely compile SCAD scripts completely in the browser.
 - **Advanced 3D Rendering:** Built-in Three.js viewer with orbit controls, auto-camera framing, and Image-Based Lighting (IBL).
 - **PBR & Animation Support:** Fully supports the extended PBR materials (metalness, roughness, glass transmission) and skeletal animations provided by the custom OpenSCAD fork.
+- **Local Saving:** Seamlessly save AI-generated `.scad` code directly to your local machine via a local backend server.
 
 ## 🚀 Getting Started
 
@@ -57,6 +58,30 @@ Open the provided `localhost` URL in your browser. You will see a split-screen l
 3. Once the AI generates the code block, a **👀 Preview 3D** button will appear at the top of the snippet.
 4. Click the button to open the floating 3D viewer.
 5. Drag to rotate, scroll to zoom. Click the **X** to close the overlay.
+
+### 💾 Saving Models Locally
+
+The 3D preview overlay includes a Save UI in the top-left corner, allowing you to instantly save the generated `.scad` code to your computer.
+
+Because browser extensions cannot write directly to your file system silently, this feature connects to a local development environment using the `scad-serve` CLI.
+
+**1. Start the local backend server:**
+Run this in your desired save folder to bridge the extension to your filesystem (runs on port `3000` by default).
+
+- **Option A: Run directly (No installation)**
+  ```bash
+  npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-serve
+  ```
+- **Option B: If installed locally (`npm install --save-dev github:iliagrigorevdev/openscad-gltf-wasm`)**
+  ```bash
+  npx scad-serve
+  ```
+
+**2. Save from the Extension:**
+
+1. Once the AI generates code, open the **👀 Preview 3D** window.
+2. In the top-left corner, enter your desired filename (e.g., `my_model`).
+3. Click **Save**. The extension will check if the file already exists (prompting for overwrite if needed) and save the `.scad` file directly to the folder where you ran the server.
 
 ## 🧠 Better Prompts with AI
 
