@@ -29,7 +29,8 @@ export function generatePrompt(description, options = {}) {
   prompt += `\n\nImportant Output & Naming Rules:
 - You MUST wrap your code in a standard Markdown code block using the \`\`\`openscad language tag.
 - Inside the code block, on the first line, include a block comment with a concise filename in snake_case (lowercase and underscores).
-- Use this exact format: /* Model Name: your_model_name_here */`;
+- Use this exact format: /* Model Name: your_model_name_here */
+- Coordinate System: OpenSCAD uses a right-handed Z-up coordinate system. The XY plane is the ground (width and depth), and +Z is UP (height). Keep this in mind when positioning and rotating objects so they stand upright. The viewer camera looks from the Front (Negative Y-axis) towards the origin. You MUST build objects facing Front (-Y).`;
 
   let attrs = [];
   if (opts.basic) attrs.push("'roughness'", "'metalness'");
@@ -106,7 +107,7 @@ export function generatePrompt(description, options = {}) {
     ]]
   ];
 - Rotation Keyframes: Due to glTF Quaternion shortest-path interpolation, NEVER rotate more than 90 degrees between consecutive keyframes. To perform a full 360-degree rotation, you MUST manually subdivide it into 90-degree increments (e.g., 0, 90, 180, 270, 360).
-- Translational Animation: If you want a bone to move translationally, provide the [trans_x, trans_y, trans_z] array in the keyframes. If omitted, the bone defaults to its resting position.
+- Translational & Rotational Keyframes: Keyframe translations and rotations are ABSOLUTE in local space. They completely replace the bone's resting 't' and 'r' attributes during the animation. If a bone's resting translation is [0, 0, 2] and it needs to move 10 units up, the keyframe translation must be [0, 0, 12]. If translation is omitted, it defaults to the resting position.
 
 Example Animation Usage:
 anim_data = [
@@ -119,9 +120,9 @@ anim_data = [
       [4.0, [0, 0, 360]]
     ]],
     ["ChildSlider", [
-      [0.0, [0, 0, 0], [0, 0, 0]],
-      [2.0, [0, 0, 0], [0, 0, 10]],
-      [4.0, [0, 0, 0], [0, 0, 0]]
+      [0.0, [0, 0, 0], [0, 0, 2]],
+      [2.0, [0, 0, 0], [0, 0, 12]],
+      [4.0, [0, 0, 0], [0, 0, 2]]
     ]]
   ]]
 ];
