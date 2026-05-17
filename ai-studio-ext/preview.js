@@ -7,8 +7,11 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 
 const viewerEl = document.getElementById("viewer");
 const statusEl = document.getElementById("status");
+const filenameInput = document.getElementById("filename-input");
+const saveBtn = document.getElementById("save-btn");
 
 let currentMesh = null;
+let latestScadCode = "";
 let isCompiling = false;
 let pendingCode = null;
 let mixer = null;
@@ -230,6 +233,71 @@ async function compileAndRender(scadCode) {
 // --- Listen for Messages ---
 window.addEventListener("message", async (event) => {
   if (event.data.type === "RENDER_SCAD") {
+    latestScadCode = event.data.code;
     await compileAndRender(event.data.code);
+  }
+});
+
+// --- Save Functionality ---
+saveBtn.addEventListener("click", async () => {
+  let filename = filenameInput.value.trim();
+  if (!filename) {
+    alert("Please enter a filename.");
+    filenameInput.focus();
+    return;
+  }
+
+  if (!filename.toLowerCase().endsWith(".scad")) {
+    filename += ".scad";
+  }
+
+  const backendUrl = "http://localhost:3000";
+
+  try {
+    saveBtn.innerText = "Checking...";
+    saveBtn.disabled = true;
+
+    // 1. Fetch file list to check if it exists
+    const res = await fetch(`${backendUrl}/api/scads`);
+    if (!res.ok) throw new Error("Could not reach scad-serve.");
+
+    const data = await res.json();
+    const fileExists = data.files && data.files.includes(filename);
+
+    if (fileExists) {
+      const overwrite = confirm(
+        `File "${filename}" already exists. Overwrite?`,
+      );
+      if (!overwrite) {
+        saveBtn.innerText = "Save";
+        saveBtn.disabled = false;
+        return;
+      }
+    }
+
+    saveBtn.innerText = "Saving...";
+
+    // 2. Save the file
+    const saveRes = await fetch(`${backendUrl}/api/scads`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename, content: latestScadCode || "" }),
+    });
+
+    if (!saveRes.ok) {
+      const errData = await saveRes.json();
+      throw new Error(errData.error || "Save failed.");
+    }
+
+    saveBtn.innerText = "✅ Saved!";
+    setTimeout(() => {
+      saveBtn.innerText = "Save";
+      saveBtn.disabled = false;
+    }, 2000);
+  } catch (err) {
+    console.error(err);
+    alert("Error saving file: " + err.message);
+    saveBtn.innerText = "Save";
+    saveBtn.disabled = false;
   }
 });
