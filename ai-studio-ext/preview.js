@@ -247,10 +247,6 @@ saveBtn.addEventListener("click", async () => {
     return;
   }
 
-  if (!filename.toLowerCase().endsWith(".scad")) {
-    filename += ".scad";
-  }
-
   const backendUrl = "http://localhost:3000";
 
   try {
@@ -262,11 +258,16 @@ saveBtn.addEventListener("click", async () => {
     if (!res.ok) throw new Error("Could not reach scad-serve.");
 
     const data = await res.json();
-    const fileExists = data.files && data.files.includes(filename);
+
+    // Backend appends .scad, so we must check against that exact name
+    const checkFilename = filename.toLowerCase().endsWith(".scad")
+      ? filename
+      : `${filename}.scad`;
+    const fileExists = data.files && data.files.includes(checkFilename);
 
     if (fileExists) {
       const overwrite = confirm(
-        `File "${filename}" already exists. Overwrite?`,
+        `File "${checkFilename}" already exists. Overwrite?`,
       );
       if (!overwrite) {
         saveBtn.innerText = "Save";
