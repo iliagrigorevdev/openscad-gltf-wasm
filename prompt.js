@@ -30,7 +30,8 @@ export function generatePrompt(description, options = {}) {
 - You MUST wrap your code in a standard Markdown code block using the \`\`\`openscad language tag.
 - Inside the code block, on the first line, include a block comment with a concise filename in snake_case (lowercase and underscores).
 - Use this exact format: /* Model Name: your_model_name_here */
-- Coordinate System: OpenSCAD uses a right-handed Z-up coordinate system. The XY plane is the ground (width and depth), and +Z is UP (height). Keep this in mind when positioning and rotating objects so they stand upright. The viewer camera looks from the Front (Negative Y-axis) towards the origin. You MUST build objects facing Front (-Y).`;
+- Coordinate System: OpenSCAD uses a right-handed Z-up coordinate system. The XY plane is the ground (width and depth), and +Z is UP (height). Keep this in mind when positioning and rotating objects so they stand upright. The viewer camera looks from the Front (Negative Y-axis) towards the origin. You MUST build objects facing Front (-Y).
+- Left/Right Convention: Always name and position "left" and "right" components (e.g., LeftArm, RightEye) based on the object's anatomical point of view (facing Forward towards -Y), NOT the camera/viewer's screen perspective. Because the object faces -Y, the object's Left side is along the +X axis, and the object's Right side is along the -X axis.`;
 
   let attrs = [];
   if (opts.basic) attrs.push("'roughness'", "'metalness'");
