@@ -92,14 +92,23 @@ function createPromptModal() {
 
       <div class="scad-prompt-toggles">
         <label><input type="checkbox" id="ext-opt-pbr-basic" checked /> Basic PBR</label>
-        <label><input type="checkbox" id="ext-opt-pbr-transmission" checked /> Transmission</label>
-        <label><input type="checkbox" id="ext-opt-pbr-clearcoat" checked /> Clearcoat</label>
-        <label><input type="checkbox" id="ext-opt-pbr-sheen" checked /> Sheen</label>
-        <label><input type="checkbox" id="ext-opt-pbr-emissive" checked /> Emissive</label>
-        <label><input type="checkbox" id="ext-opt-pbr-specular" checked /> Specular</label>
-        <label><input type="checkbox" id="ext-opt-pbr-iridescence" checked /> Iridescence</label>
         <label><input type="checkbox" id="ext-opt-pbr-autosmooth" checked /> Auto Smooth</label>
         <label><input type="checkbox" id="ext-opt-anim" checked /> Animations</label>
+      </div>
+
+      <div class="scad-prompt-group">
+        <div class="scad-prompt-group-header">
+          <span>Extended PBR</span>
+          <label><input type="checkbox" id="ext-opt-pbr-all" checked /> Enable All</label>
+        </div>
+        <div class="scad-prompt-toggles nested">
+          <label><input type="checkbox" class="ext-pbr-child" id="ext-opt-pbr-transmission" checked /> Transmission</label>
+          <label><input type="checkbox" class="ext-pbr-child" id="ext-opt-pbr-clearcoat" checked /> Clearcoat</label>
+          <label><input type="checkbox" class="ext-pbr-child" id="ext-opt-pbr-sheen" checked /> Sheen</label>
+          <label><input type="checkbox" class="ext-pbr-child" id="ext-opt-pbr-emissive" checked /> Emissive</label>
+          <label><input type="checkbox" class="ext-pbr-child" id="ext-opt-pbr-specular" checked /> Specular</label>
+          <label><input type="checkbox" class="ext-pbr-child" id="ext-opt-pbr-iridescence" checked /> Iridescence</label>
+        </div>
       </div>
 
       <textarea id="scad-prompt-desc" rows="3" placeholder="e.g. A shiny gold ring with an embedded red gem"></textarea>
@@ -120,6 +129,24 @@ function createPromptModal() {
   modal.onclick = (e) => {
     if (e.target === modal) modal.style.display = "none";
   };
+
+  // Grouped Checkbox Logic
+  const extPbrAll = document.getElementById("ext-opt-pbr-all");
+  const extPbrChildren = document.querySelectorAll(".ext-pbr-child");
+
+  extPbrAll.addEventListener("change", (e) => {
+    const checked = e.target.checked;
+    extPbrChildren.forEach((cb) => (cb.checked = checked));
+  });
+
+  extPbrChildren.forEach((cb) => {
+    cb.addEventListener("change", () => {
+      const allChecked = Array.from(extPbrChildren).every((c) => c.checked);
+      const someChecked = Array.from(extPbrChildren).some((c) => c.checked);
+      extPbrAll.checked = allChecked;
+      extPbrAll.indeterminate = someChecked && !allChecked;
+    });
+  });
 
   document.getElementById("scad-prompt-submit").onclick = async () => {
     const description = document
