@@ -85,7 +85,21 @@ export function generatePrompt(description, options = {}) {
       prompt += `\n- Auto Smooth Angle: Generates smooth vertex normals for adjoining faces with an angle difference less than this value (in degrees). Use > 0 (e.g., 30 or 45) for curved/smooth surfaces, 0.0 for flat shading. (Default: 0.0)`;
     }
 
-    prompt += `\n\nExample Material Usage:\n// Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])\ncolor([0.2, 0.2, 0.2], alpha=1.0, metalness=1.0, roughness=0.3, iridescence=1.0, emissive=[0.0, 0.5, 1.0], emissiveIntensity=2.0, autoSmoothAngle=45.0)\n  cube([10, 10, 10]);`;
+    let exampleParams = [];
+    if (opts.basic) exampleParams.push("metalness=1.0", "roughness=0.3");
+    if (opts.transmission) exampleParams.push("transmission=0.8", "ior=1.5");
+    if (opts.clearcoat) exampleParams.push("clearcoat=1.0");
+    if (opts.sheen) exampleParams.push("sheen=1.0");
+    if (opts.iridescence) exampleParams.push("iridescence=1.0");
+    if (opts.emissive)
+      exampleParams.push("emissive=[0.0, 0.5, 1.0]", "emissiveIntensity=2.0");
+    if (opts.specular) exampleParams.push("specularIntensity=1.0");
+    if (opts.autoSmoothAngle) exampleParams.push("autoSmoothAngle=45.0");
+
+    let exampleStr =
+      exampleParams.length > 0 ? ", " + exampleParams.join(", ") : "";
+
+    prompt += `\n\nExample Material Usage:\n// Syntax: color(c=color_value, alpha=1.0, [named PBR parameters...])\ncolor([0.2, 0.2, 0.2], alpha=1.0${exampleStr})\n  cube([10, 10, 10]);`;
   }
 
   if (opts.lazyUnion) {
