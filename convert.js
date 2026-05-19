@@ -6,13 +6,13 @@ import OpenScad from "./openscad.js";
  * @param {Object} [options={}] - Options object.
  * @param {string} [options.wasmUrl] - Optional URL to the openscad.wasm file, useful for bundlers or extensions.
  * @param {boolean} [options.binary=true] - Whether to compile to a binary GLB (true) or normal GLTF (false).
- * @param {boolean} [options.lazyUnion=true] - Whether to apply the lazy union optimization (--enable=lazy-union).
+ * @param {boolean} [options.lazyUnion=false] - Whether to apply the lazy union optimization (--enable=lazy-union).
  * @returns {Promise<Uint8Array>} The resulting GLB/GLTF data.
  */
 export async function convertScadToGltf(scadCode, options = {}) {
   const wasmUrl = options.wasmUrl;
   const isBinary = options.binary !== undefined ? options.binary : true;
-  const lazyUnion = options.lazyUnion !== undefined ? options.lazyUnion : true;
+  const lazyUnion = options.lazyUnion !== undefined ? options.lazyUnion : false;
 
   // Initialize a NEW instance every time because callMain terminates the WASM environment
   const instance = await OpenScad({

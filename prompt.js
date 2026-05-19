@@ -21,7 +21,7 @@ export function generatePrompt(description, options = {}) {
     iridescence: options.iridescence ?? true,
     autoSmoothAngle: options.autoSmoothAngle ?? true,
     animation: options.animation ?? true,
-    lazyUnion: options.lazyUnion ?? true,
+    lazyUnion: options.lazyUnion ?? false,
   };
 
   let prompt = `Generate an OpenSCAD script to design the following: ${description}.`;
