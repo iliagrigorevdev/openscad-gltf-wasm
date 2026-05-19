@@ -2,6 +2,13 @@ import { generatePrompt } from "openscad-gltf-wasm/prompt";
 
 console.log("🚀 SCAD Preview Extension loaded!");
 
+window.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "CLOSE_PREVIEW") {
+    const container = document.getElementById("scad-preview-iframe");
+    if (container) container.remove();
+  }
+});
+
 // Watch the DOM for AI-generated code blocks and UI changes
 const observer = new MutationObserver(() => {
   injectPromptButton();

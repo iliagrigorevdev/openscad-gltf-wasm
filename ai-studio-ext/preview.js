@@ -353,6 +353,7 @@ openEditorBtn.addEventListener("click", async () => {
     const url = `https://iliagrigorevdev.github.io/openscad-gltf-viewer/#${hash}`;
 
     window.open(url, "_blank");
+    window.parent.postMessage({ type: "CLOSE_PREVIEW" }, "*");
 
     openEditorBtn.innerText = "✅ Opened!";
     setTimeout(() => {
