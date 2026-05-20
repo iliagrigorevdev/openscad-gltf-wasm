@@ -16,6 +16,7 @@ This WASM module was generated from the `gltf` branch of the forked [openscad](h
 - **True Skeletal Skinning:** Exports absolute world transforms and properly bound animation tracks.
 - **LLM Friendly:** Includes a built-in prompt generator (`prompt.js`) to help AI models (like Gemini or Claude) write compatible OpenSCAD scripts utilizing the new features.
 - **Local API Server:** Bundled `scad-serve` CLI utility to manage local `.scad` files remotely via REST API.
+- **CLI Converter:** Bundled `scad-convert` CLI utility for batch compiling `.scad` files with smart dependency hashing.
 - **AI Studio Extension:** Includes a Chrome extension to natively preview and locally save AI-generated 3D models directly inside Google AI Studio.
 
 ---
@@ -92,6 +93,44 @@ const scadCode = `cylinder(h=20, r=5);`;
 
 const glbData = await convertScadToGltf(scadCode, { wasmUrl });
 ```
+
+---
+
+## Command Line Conversion (`scad-convert`)
+
+The package includes a CLI utility to convert `.scad` files to `.glb` directly from your terminal. It supports single files or entire directories, and features a smart caching system to speed up build pipelines.
+
+**Run the converter using one of these options:**
+
+- **Option A: Run directly (No installation)**
+  ```bash
+  npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-convert <input.scad | input_dir> <output.glb | output_dir> [options_json] [--cache]
+  ```
+- **Option B: If installed as a dependency**
+  ```bash
+  npx scad-convert <input.scad | input_dir> <output.glb | output_dir> [options_json] [--cache]
+  ```
+
+**Examples:**
+
+- **Single File:**
+  ```bash
+  npx scad-convert model.scad model.glb
+  ```
+- **Directory Batch Conversion:**
+  ```bash
+  npx scad-convert ./src_models ./out_glbs
+  ```
+- **With Smart Caching (`--cache`):**
+  Works similarly to Godot's asset pipeline. It generates a `.import` file containing a hash of the `.scad` content (including any resolved `include` or `use` dependencies) and compiler options. Subsequent runs will skip the conversion if no changes are detected.
+  ```bash
+  npx scad-convert ./src_models ./out_glbs --cache
+  ```
+- **With Options:**
+  Pass custom compiler options as a JSON string (or Base64 encoded JSON).
+  ```bash
+  npx scad-convert model.scad model.glb '{"binary": false}'
+  ```
 
 ---
 

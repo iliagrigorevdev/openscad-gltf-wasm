@@ -2,6 +2,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import crypto from "crypto";
 import { convertScadToGltf } from "../convert.js";
 
 // 1. Resolve the local WASM file path (assuming the script is in /bin and wasm is in root)
@@ -22,15 +23,48 @@ global.fetch = async (url) => {
   });
 };
 
+/**
+ * Recursively resolves local dependencies (include / use) to build a combined content string.
+ * This ensures changes in included files also trigger a re-import.
+ */
+function getFileAndDependenciesContent(filePath, visited = new Set()) {
+  if (visited.has(filePath)) return "";
+  visited.add(filePath);
+
+  if (!fs.existsSync(filePath)) {
+    return "";
+  }
+
+  const content = fs.readFileSync(filePath, "utf8");
+  let totalContent = content;
+
+  // Match include <...> or "..." and use <...> or "..."
+  const includeRegex = /(?:include|use)\s*([<"])([^>"]+)([>"])/g;
+  let match;
+  while ((match = includeRegex.exec(content)) !== null) {
+    const depRelativePath = match[2];
+    const depAbsolutePath = path.resolve(
+      path.dirname(filePath),
+      depRelativePath,
+    );
+    totalContent += getFileAndDependenciesContent(depAbsolutePath, visited);
+  }
+
+  return totalContent;
+}
+
 async function run() {
-  const args = process.argv.slice(2);
+  const allArgs = process.argv.slice(2);
+  const useCache = allArgs.includes("--cache");
+  const args = allArgs.filter((arg) => arg !== "--cache");
+
   const inputPath = args[0];
   const outputPath = args[1];
   const optionsJson = args[2];
 
   if (!inputPath || !outputPath) {
     console.error(
-      "Usage: scad-convert <input.scad | input_dir> <output.glb | output_dir> [options_json]",
+      "Usage: scad-convert <input.scad | input_dir> <output.glb | output_dir> [options_json] [--cache]",
     );
     process.exit(1);
   }
@@ -110,6 +144,40 @@ async function run() {
     }
 
     const scadCode = fs.readFileSync(file, "utf8");
+    const importFilePath = `${finalOutputPath}.import`;
+
+    let needsConversion = true;
+    let currentHash = null;
+
+    if (useCache) {
+      // Hash the combination of the SCAD file (plus dependencies) and the current options
+      const totalContentForHash = getFileAndDependenciesContent(file);
+      const hashData = totalContentForHash + JSON.stringify(options);
+      currentHash = crypto.createHash("sha256").update(hashData).digest("hex");
+
+      // Check if the file has already been imported with these exact contents/options
+      if (fs.existsSync(finalOutputPath) && fs.existsSync(importFilePath)) {
+        try {
+          const importData = JSON.parse(
+            fs.readFileSync(importFilePath, "utf8"),
+          );
+          if (importData.hash === currentHash) {
+            needsConversion = false;
+          }
+        } catch (e) {
+          // Ignore JSON parse errors, proceed with conversion
+        }
+      }
+    }
+
+    if (!needsConversion) {
+      console.log(`Skipped ${path.basename(file)} (no changes detected)`);
+      continue;
+    }
+
+    if (useCache || isInputDirectory) {
+      console.log(`Converting ${path.basename(file)} -> ${finalOutputPath}...`);
+    }
 
     try {
       // Pass the raw SCAD directly to the WASM converter
@@ -119,6 +187,22 @@ async function run() {
       });
 
       fs.writeFileSync(finalOutputPath, glbData);
+
+      if (useCache) {
+        // Save an import cache file
+        fs.writeFileSync(
+          importFilePath,
+          JSON.stringify(
+            {
+              hash: currentHash,
+              source: path.basename(file),
+              timestamp: new Date().toISOString(),
+            },
+            null,
+            2,
+          ),
+        );
+      }
     } catch (error) {
       console.error(`SCAD Conversion Error for ${file}:`, error);
       process.exit(1);
