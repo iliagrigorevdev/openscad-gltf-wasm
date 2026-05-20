@@ -14,7 +14,7 @@ This WASM module was generated from the `gltf` branch of the forked [openscad](h
 - **Extended PBR Material Support:** Native extensions to the OpenSCAD `color()` module supporting `metalness`, `roughness`, `transmission` (glass), `clearcoat`, `sheen`, `ior`, `emissive`, `specular`, `iridescence`, and `autoSmoothAngle`.
 - **Skeletal Animation:** Define animated armatures and bones directly within your `.scad` files.
 - **True Skeletal Skinning:** Exports absolute world transforms and properly bound animation tracks.
-- **LLM Friendly:** Includes a built-in prompt generator (`prompt.js`) to help AI models (like Gemini or Claude) write compatible OpenSCAD scripts utilizing the new features.
+- **LLM Friendly:** Includes a built-in prompt generator (`prompt.js` / `scad-prompt` CLI) to help AI models (like Gemini or Claude) write compatible OpenSCAD scripts utilizing the new features.
 - **Local API Server:** Bundled `scad-serve` CLI utility to manage local `.scad` files remotely via REST API.
 - **CLI Converter:** Bundled `scad-convert` CLI utility for batch compiling `.scad` files with smart dependency hashing.
 - **AI Studio Extension:** Includes a Chrome extension to natively preview and locally save AI-generated 3D models directly inside Google AI Studio.
@@ -261,11 +261,11 @@ armature(animations = [
 
 ---
 
-## AI Integration (`prompt.js`)
+## AI Integration (`prompt.js` & `scad-prompt`)
 
-Because LLMs (like Gemini or Claude) only know standard OpenSCAD syntax up to their training cutoff, we've included a helper function to generate LLM prompts. This injects the rules for PBR and animations directly into your prompt context.
+Because LLMs (like Gemini or Claude) only know standard OpenSCAD syntax up to their training cutoff, we've included tools to generate LLM prompts. This injects the rules for PBR and animations directly into your prompt context.
 
-**Usage:**
+### JavaScript Usage
 
 ```javascript
 import { generatePrompt } from "openscad-gltf-wasm/prompt";
@@ -278,6 +278,50 @@ const promptContext = generatePrompt(description);
 // or print it to the console to paste into Gemini.
 console.log(promptContext);
 ```
+
+### Command Line Usage (`scad-prompt`)
+
+You can generate AI prompts directly from your terminal, which is ideal for bash scripts or piping into AI CLI tools.
+
+**Run the generator using one of these options:**
+
+- **Option A: Run directly (No installation)**
+  ```bash
+  npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-prompt <description> [options_json]
+  ```
+- **Option B: If installed as a dependency**
+  ```bash
+  npx scad-prompt <description> [options_json]
+  ```
+
+**Examples:**
+
+- **Basic Prompt Generation:**
+  ```bash
+  npx scad-prompt "a futuristic glass sword, animated to spin"
+  ```
+- **With Custom Options:**
+  Pass configuration options (to disable certain syntax rules) as a JSON string.
+  ```bash
+  npx scad-prompt "a simple flat cube" '{"animation": false, "transmission": false}'
+  ```
+
+### Available Prompt Options
+
+The `options` object (or parsed CLI `options_json`) configures which feature-specific syntax blocks are included in the generated prompt.
+
+| Option            | Type      | Default | Description                                                                                                             |
+| :---------------- | :-------- | :------ | :---------------------------------------------------------------------------------------------------------------------- |
+| `basic`           | `boolean` | `true`  | Includes basic PBR material rules (`roughness`, `metalness`).                                                           |
+| `transmission`    | `boolean` | `true`  | Includes transparency and volume rules (`transmission`, `thickness`, `ior`, `attenuationColor`, `attenuationDistance`). |
+| `clearcoat`       | `boolean` | `true`  | Includes clearcoat rules (`clearcoat`, `clearcoatRoughness`).                                                           |
+| `sheen`           | `boolean` | `true`  | Includes fabric sheen rules (`sheen`, `sheenColor`, `sheenRoughness`).                                                  |
+| `emissive`        | `boolean` | `true`  | Includes emission/glow rules (`emissive`, `emissiveIntensity`).                                                         |
+| `specular`        | `boolean` | `true`  | Includes specular highlight rules (`specularColor`, `specularIntensity`).                                               |
+| `iridescence`     | `boolean` | `true`  | Includes thin-film iridescence rules (`iridescence`, `iridescenceIOR`).                                                 |
+| `autoSmoothAngle` | `boolean` | `true`  | Includes custom mesh smoothing rules (`autoSmoothAngle`).                                                               |
+| `animation`       | `boolean` | `true`  | Includes hierarchical bone and armature rules (`armature`, `bone`).                                                     |
+| `lazyUnion`       | `boolean` | `false` | Includes geometry rules for discrete un-booleaned meshes (lazy-union).                                                  |
 
 ---
 
