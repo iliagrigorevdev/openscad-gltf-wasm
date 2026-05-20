@@ -30,9 +30,32 @@ async function run() {
 
   if (!inputPath || !outputPath) {
     console.error(
-      "Usage: scad-convert <input.scad> <output.glb> [options_json]",
+      "Usage: scad-convert <input.scad> <output.glb | output_dir> [options_json]",
     );
     process.exit(1);
+  }
+
+  let finalOutputPath = outputPath;
+  if (fs.existsSync(outputPath)) {
+    if (fs.statSync(outputPath).isDirectory()) {
+      const baseName = path.basename(inputPath, path.extname(inputPath));
+      finalOutputPath = path.join(outputPath, `${baseName}.glb`);
+    }
+  } else {
+    // If it doesn't exist, determine if it's meant to be a folder or a file
+    const ext = path.extname(outputPath).toLowerCase();
+    if (ext !== ".glb" && ext !== ".gltf") {
+      // Treat as a directory
+      fs.mkdirSync(outputPath, { recursive: true });
+      const baseName = path.basename(inputPath, path.extname(inputPath));
+      finalOutputPath = path.join(outputPath, `${baseName}.glb`);
+    } else {
+      // Treat as a file, ensure parent directory exists
+      const parentDir = path.dirname(outputPath);
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
+    }
   }
 
   let options = {};
@@ -61,7 +84,7 @@ async function run() {
       ...options,
     });
 
-    fs.writeFileSync(outputPath, glbData);
+    fs.writeFileSync(finalOutputPath, glbData);
     process.exit(0);
   } catch (error) {
     console.error("SCAD Conversion Error:", error);
