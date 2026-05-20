@@ -73,16 +73,66 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description:
                 "Optional toggles to include/exclude specific syntax blocks.",
               properties: {
-                basic: { type: "boolean" },
-                transmission: { type: "boolean" },
-                clearcoat: { type: "boolean" },
-                sheen: { type: "boolean" },
-                emissive: { type: "boolean" },
-                specular: { type: "boolean" },
-                iridescence: { type: "boolean" },
-                autoSmoothAngle: { type: "boolean" },
-                animation: { type: "boolean" },
-                lazyUnion: { type: "boolean" },
+                basic: {
+                  type: "boolean",
+                  description:
+                    "Includes basic PBR material rules (roughness, metalness). Default true.",
+                  default: true,
+                },
+                transmission: {
+                  type: "boolean",
+                  description:
+                    "Includes transparency and volume rules (transmission, thickness, ior, attenuation). Default true.",
+                  default: true,
+                },
+                clearcoat: {
+                  type: "boolean",
+                  description:
+                    "Includes clearcoat rules (clearcoat, clearcoatRoughness). Default true.",
+                  default: true,
+                },
+                sheen: {
+                  type: "boolean",
+                  description:
+                    "Includes fabric sheen rules (sheen, sheenColor, sheenRoughness). Default true.",
+                  default: true,
+                },
+                emissive: {
+                  type: "boolean",
+                  description:
+                    "Includes emission/glow rules (emissive, emissiveIntensity). Default true.",
+                  default: true,
+                },
+                specular: {
+                  type: "boolean",
+                  description:
+                    "Includes specular highlight rules (specularColor, specularIntensity). Default true.",
+                  default: true,
+                },
+                iridescence: {
+                  type: "boolean",
+                  description:
+                    "Includes thin-film iridescence rules (iridescence, iridescenceIOR). Default true.",
+                  default: true,
+                },
+                autoSmoothAngle: {
+                  type: "boolean",
+                  description:
+                    "Includes custom mesh smoothing rules (autoSmoothAngle). Default true.",
+                  default: true,
+                },
+                animation: {
+                  type: "boolean",
+                  description:
+                    "Includes hierarchical bone and armature rules (armature, bone). Default true.",
+                  default: true,
+                },
+                lazyUnion: {
+                  type: "boolean",
+                  description:
+                    "Includes geometry rules for discrete un-booleaned meshes (lazy-union). Default false.",
+                  default: false,
+                },
               },
             },
           },
@@ -113,10 +163,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   type: "boolean",
                   description:
                     "Output as binary GLB (true) or normal GLTF (false). Default true.",
+                  default: true,
                 },
                 lazyUnion: {
                   type: "boolean",
                   description: "Enable lazy union optimization. Default false.",
+                  default: false,
                 },
               },
             },
