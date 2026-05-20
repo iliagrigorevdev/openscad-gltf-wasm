@@ -1,12 +1,13 @@
 {
   "name": "openscad-gltf-wasm",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "type": "module",
   "main": "openscad.js",
   "bin": {
     "scad-convert": "./bin/scad-convert.js",
     "scad-serve": "./bin/scad-serve.js",
-    "scad-prompt": "./bin/scad-prompt.js"
+    "scad-prompt": "./bin/scad-prompt.js",
+    "scad-mcp": "./bin/scad-mcp.js"
   },
   "exports": {
     ".": "./openscad.js",
@@ -20,6 +21,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "express": "^5.2.1"
   },
   "devDependencies": {
