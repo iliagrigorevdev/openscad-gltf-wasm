@@ -174,6 +174,12 @@ app.post("/api/convert", async (req, res) => {
   }
 });
 
+console.log("Starting local OpenSCAD GLTF server...");
+console.log(
+  "To view your models, use the online viewer at: https://iliagrigorevdev.github.io/openscad-gltf-viewer/",
+);
+console.log("");
+
 // Start Server
 app.listen(port, () => {
   console.log(`🚀 scad-serve listening on port ${port}`);
