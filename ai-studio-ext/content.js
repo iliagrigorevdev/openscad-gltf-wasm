@@ -65,8 +65,14 @@ function injectPromptButton() {
     // Open our custom modal instead of window.prompt
     const modal = document.getElementById("scad-prompt-modal");
     if (modal) {
+      const descInput = document.getElementById("scad-prompt-desc");
+      if (descInput) {
+        descInput.value = ""; // Clear text on every open
+      }
       modal.style.display = "flex";
-      document.getElementById("scad-prompt-desc").focus();
+      if (descInput) {
+        descInput.focus();
+      }
     }
   };
 
@@ -134,18 +140,52 @@ function createPromptModal() {
   const extPbrAll = document.getElementById("ext-opt-pbr-all");
   const extPbrChildren = document.querySelectorAll(".ext-pbr-child");
 
+  const updatePbrAllState = () => {
+    const allChecked = Array.from(extPbrChildren).every((c) => c.checked);
+    const someChecked = Array.from(extPbrChildren).some((c) => c.checked);
+    extPbrAll.checked = allChecked;
+    extPbrAll.indeterminate = someChecked && !allChecked;
+  };
+
   extPbrAll.addEventListener("change", (e) => {
     const checked = e.target.checked;
     extPbrChildren.forEach((cb) => (cb.checked = checked));
   });
 
   extPbrChildren.forEach((cb) => {
-    cb.addEventListener("change", () => {
-      const allChecked = Array.from(extPbrChildren).every((c) => c.checked);
-      const someChecked = Array.from(extPbrChildren).some((c) => c.checked);
-      extPbrAll.checked = allChecked;
-      extPbrAll.indeterminate = someChecked && !allChecked;
+    cb.addEventListener("change", updatePbrAllState);
+  });
+
+  // --- Persist Options Logic ---
+  const STORAGE_KEY = "scad_prompt_settings";
+
+  const saveSettings = () => {
+    const state = {};
+    modal.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+      state[cb.id] = cb.checked;
     });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  };
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Restore Checkboxes Only
+      modal.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+        if (parsed[cb.id] !== undefined) {
+          cb.checked = parsed[cb.id];
+        }
+      });
+      updatePbrAllState(); // Recalculate indeterminate state
+    }
+  } catch (e) {
+    console.warn("Could not load SCAD prompt settings", e);
+  }
+
+  // Listeners to auto-save to storage on option modifications
+  modal.addEventListener("change", (e) => {
+    if (e.target.type === "checkbox") saveSettings();
   });
 
   document.getElementById("scad-prompt-submit").onclick = async () => {
