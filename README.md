@@ -353,8 +353,8 @@ Add the following configuration block to your MCP client's configuration file:
 Once connected, an AI assistant can use the server to execute the following loop:
 
 1. **Retrieve Syntax Rules:** The assistant calls the `generate_prompt` tool to get the extended syntax rules for PBR materials and skeletal animations.
-2. **Generate Code:** The assistant writes the `.scad` script based on your design request.
-3. **Compile to 3D File:** The assistant calls the `convert_scad_to_glb` tool to compile the code and save the resulting `.glb` model directly to your specified local directory.
+2. **Generate Code:** The assistant writes the `.scad` script to a local file based on your design request.
+3. **Compile to 3D File:** The assistant calls the `convert_scad_to_glb` tool providing the input file path to compile it and save the resulting `.glb` model directly to your specified local directory.
 
 ---
 

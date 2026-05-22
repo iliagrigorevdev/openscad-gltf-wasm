@@ -142,13 +142,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "convert_scad_to_glb",
         description:
-          "Converts OpenSCAD (.scad) code directly to a Web-ready GLTF/GLB binary 3D file on the local file system. Supports PBR materials and skeletal animations.",
+          "Converts a local OpenSCAD (.scad) file directly to a Web-ready GLTF/GLB binary 3D file on the local file system. Supports PBR materials and skeletal animations.",
         inputSchema: {
           type: "object",
           properties: {
-            scadCode: {
+            inputPath: {
               type: "string",
-              description: "The raw OpenSCAD code string to compile.",
+              description:
+                "The absolute local file path to the input .scad file.",
             },
             outputPath: {
               type: "string",
@@ -173,7 +174,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               },
             },
           },
-          required: ["scadCode", "outputPath"],
+          required: ["inputPath", "outputPath"],
         },
       },
     ],
@@ -201,8 +202,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     case "convert_scad_to_glb": {
-      const { scadCode, outputPath, options } = request.params.arguments;
+      const { inputPath, outputPath, options } = request.params.arguments;
       try {
+        if (!fs.existsSync(inputPath)) {
+          throw new Error(`Input file not found: ${inputPath}`);
+        }
+        const scadCode = fs.readFileSync(inputPath, "utf-8");
+
         const conversionOptions = {
           wasmUrl: `file://${wasmPath}`,
           ...(options || {}),
