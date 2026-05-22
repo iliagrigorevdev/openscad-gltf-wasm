@@ -108,6 +108,8 @@ async function run() {
     }
   }
 
+  let hasErrors = false;
+
   for (const file of inputFiles) {
     let finalOutputPath = outputPath;
 
@@ -204,8 +206,13 @@ async function run() {
       }
     } catch (error) {
       console.error(`SCAD Conversion Error for ${file}:`, error);
-      process.exit(1);
+      hasErrors = true;
     }
+  }
+
+  if (hasErrors) {
+    console.error("Batch completed with errors.");
+    process.exit(1);
   }
 
   process.exit(0);
