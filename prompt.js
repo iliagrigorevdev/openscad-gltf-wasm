@@ -28,6 +28,7 @@ export function generatePrompt(description, options = {}) {
 
   prompt += `\n\nImportant Output & Naming Rules:
 - Export Target: The script will be compiled and exported as a GLB (glTF) file. This allows for node-based animations and extended PBR materials.
+- Scale & Units: glTF treat 1 OpenSCAD unit as 1 Meter. Design your objects using realistic meter-based scales (e.g., a character should be ~1.8 units tall). DO NOT use millimeter-based scaling.
 - You MUST wrap your code in a standard Markdown code block using the \`\`\`openscad language tag.
 - Inside the code block, on the first line, include a block comment with a concise filename in snake_case (lowercase and underscores).
 - Use this exact format: /* Model Name: your_model_name_here */
