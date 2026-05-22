@@ -5,12 +5,10 @@ import { fileURLToPath } from "url";
 import crypto from "crypto";
 import { convertScadToGltf } from "../convert.js";
 
-// 1. Resolve the local WASM file path (assuming the script is in /bin and wasm is in root)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const wasmPath = path.resolve(__dirname, "../openscad.wasm");
 
-// 2. Polyfill fetch so the WASM loader works natively in Node.js
 global.fetch = async (url) => {
   const normalizedPath = url.toString().startsWith("file://")
     ? fileURLToPath(url.toString())
@@ -24,19 +22,19 @@ global.fetch = async (url) => {
 };
 
 /**
- * Recursively resolves local dependencies (include / use) to build a combined content string.
- * This ensures changes in included files also trigger a re-import.
+ * Recursively resolves local dependencies (include / use) to extract their contents.
+ * Returns a map of absolute file paths to their string contents.
  */
-function getFileAndDependenciesContent(filePath, visited = new Set()) {
-  if (visited.has(filePath)) return "";
-  visited.add(filePath);
+function getDependencies(filePath, visited = new Map()) {
+  if (visited.has(filePath)) return visited;
+  visited.set(filePath, ""); // Prevent infinite recursion cycles
 
   if (!fs.existsSync(filePath)) {
-    return "";
+    return visited;
   }
 
   const content = fs.readFileSync(filePath, "utf8");
-  let totalContent = content;
+  visited.set(filePath, content);
 
   // Match include <...> or "..." and use <...> or "..."
   const includeRegex = /(?:include|use)\s*([<"])([^>"]+)([>"])/g;
@@ -47,10 +45,10 @@ function getFileAndDependenciesContent(filePath, visited = new Set()) {
       path.dirname(filePath),
       depRelativePath,
     );
-    totalContent += getFileAndDependenciesContent(depAbsolutePath, visited);
+    getDependencies(depAbsolutePath, visited);
   }
 
-  return totalContent;
+  return visited;
 }
 
 async function run() {
@@ -75,8 +73,8 @@ async function run() {
   }
 
   const isInputDirectory = fs.statSync(inputPath).isDirectory();
-
   let inputFiles = [];
+
   if (isInputDirectory) {
     const files = fs.readdirSync(inputPath);
     for (const file of files) {
@@ -90,7 +88,6 @@ async function run() {
       process.exit(0);
     }
 
-    // Output must be a directory if input is a directory
     if (!fs.existsSync(outputPath)) {
       fs.mkdirSync(outputPath, { recursive: true });
     } else if (!fs.statSync(outputPath).isDirectory()) {
@@ -104,10 +101,8 @@ async function run() {
   let options = {};
   if (optionsJson) {
     if (optionsJson.startsWith("{")) {
-      // If it starts with '{', try parsing as normal JSON
       options = JSON.parse(optionsJson);
     } else {
-      // Otherwise, safely decode the Base64 string
       const decoded = Buffer.from(optionsJson, "base64").toString("utf8");
       options = JSON.parse(decoded);
     }
@@ -116,46 +111,53 @@ async function run() {
   for (const file of inputFiles) {
     let finalOutputPath = outputPath;
 
-    if (isInputDirectory) {
+    if (
+      isInputDirectory ||
+      (fs.existsSync(outputPath) && fs.statSync(outputPath).isDirectory())
+    ) {
       const baseName = path.basename(file, path.extname(file));
       finalOutputPath = path.join(outputPath, `${baseName}.glb`);
     } else {
-      if (fs.existsSync(outputPath)) {
-        if (fs.statSync(outputPath).isDirectory()) {
-          const baseName = path.basename(file, path.extname(file));
-          finalOutputPath = path.join(outputPath, `${baseName}.glb`);
-        }
+      const ext = path.extname(outputPath).toLowerCase();
+      if (ext !== ".glb" && ext !== ".gltf") {
+        fs.mkdirSync(outputPath, { recursive: true });
+        const baseName = path.basename(file, path.extname(file));
+        finalOutputPath = path.join(outputPath, `${baseName}.glb`);
       } else {
-        // If it doesn't exist, determine if it's meant to be a folder or a file
-        const ext = path.extname(outputPath).toLowerCase();
-        if (ext !== ".glb" && ext !== ".gltf") {
-          // Treat as a directory
-          fs.mkdirSync(outputPath, { recursive: true });
-          const baseName = path.basename(file, path.extname(file));
-          finalOutputPath = path.join(outputPath, `${baseName}.glb`);
-        } else {
-          // Treat as a file, ensure parent directory exists
-          const parentDir = path.dirname(outputPath);
-          if (!fs.existsSync(parentDir)) {
-            fs.mkdirSync(parentDir, { recursive: true });
-          }
-        }
+        const parentDir = path.dirname(outputPath);
+        if (!fs.existsSync(parentDir))
+          fs.mkdirSync(parentDir, { recursive: true });
       }
     }
 
-    const scadCode = fs.readFileSync(file, "utf8");
     const importFilePath = `${finalOutputPath}.import`;
+
+    // 1. Gather all dependencies automatically
+    const depsMap = getDependencies(file);
+    const scadCode = depsMap.get(file);
+    depsMap.delete(file);
+
+    let totalContentForHash = scadCode;
+    const additionalFiles = {};
+    const baseDir = path.dirname(file);
+
+    // Sort paths to ensure consistent deterministic hashing
+    const sortedDepPaths = Array.from(depsMap.keys()).sort();
+    for (const depPath of sortedDepPaths) {
+      const content = depsMap.get(depPath);
+      totalContentForHash += content;
+      // Calculate path relative to the main file, normalize for VFS
+      let relPath = path.relative(baseDir, depPath).replace(/\\/g, "/");
+      additionalFiles[relPath] = content;
+    }
 
     let needsConversion = true;
     let currentHash = null;
 
     if (useCache) {
-      // Hash the combination of the SCAD file (plus dependencies) and the current options
-      const totalContentForHash = getFileAndDependenciesContent(file);
       const hashData = totalContentForHash + JSON.stringify(options);
       currentHash = crypto.createHash("sha256").update(hashData).digest("hex");
 
-      // Check if the file has already been imported with these exact contents/options
       if (fs.existsSync(finalOutputPath) && fs.existsSync(importFilePath)) {
         try {
           const importData = JSON.parse(
@@ -164,9 +166,7 @@ async function run() {
           if (importData.hash === currentHash) {
             needsConversion = false;
           }
-        } catch (e) {
-          // Ignore JSON parse errors, proceed with conversion
-        }
+        } catch (e) {}
       }
     }
 
@@ -180,16 +180,15 @@ async function run() {
     }
 
     try {
-      // Pass the raw SCAD directly to the WASM converter
       const glbData = await convertScadToGltf(scadCode, {
         wasmUrl: `file://${wasmPath}`,
+        additionalFiles,
         ...options,
       });
 
       fs.writeFileSync(finalOutputPath, glbData);
 
       if (useCache) {
-        // Save an import cache file
         fs.writeFileSync(
           importFilePath,
           JSON.stringify(

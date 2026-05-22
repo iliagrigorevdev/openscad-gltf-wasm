@@ -152,7 +152,7 @@ app.delete("/api/scads/:filename", (req, res) => {
 
 // 5. Convert SCAD to GLB
 app.post("/api/convert", async (req, res) => {
-  const { content } = req.body;
+  const { content, filename } = req.body;
 
   if (!content) {
     return res
@@ -160,10 +160,29 @@ app.post("/api/convert", async (req, res) => {
       .json({ error: "Missing 'content' in request body." });
   }
 
+  // Automatically bundle any other sibling `.scad` files in the directory
+  // so `include` works implicitly for real-time web UI previews.
+  const additionalFiles = {};
   try {
-    // Pass the raw SCAD directly to the WASM converter entirely in-memory
+    const files = fs
+      .readdirSync(workDir)
+      .filter((file) => file.toLowerCase().endsWith(".scad"));
+
+    for (const file of files) {
+      if (filename && file === path.basename(filename)) continue;
+      additionalFiles[file] = fs.readFileSync(
+        path.join(workDir, file),
+        "utf-8",
+      );
+    }
+  } catch (err) {
+    console.error("Error reading additional files for conversion:", err);
+  }
+
+  try {
     const glbData = await convertScadToGltf(content, {
       wasmUrl: `file://${wasmPath}`,
+      additionalFiles,
     });
 
     res.setHeader("Content-Type", "model/gltf-binary");

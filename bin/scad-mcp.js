@@ -39,6 +39,26 @@ global.fetch = async (url, options) => {
   throw new Error(`Fetch not polyfilled for: ${urlStr}`);
 };
 
+// Helper function to resolve dependencies for AI compilation requests
+function getDependencies(filePath, visited = new Map()) {
+  if (visited.has(filePath)) return visited;
+  visited.set(filePath, "");
+
+  if (!fs.existsSync(filePath)) return visited;
+
+  const content = fs.readFileSync(filePath, "utf8");
+  visited.set(filePath, content);
+
+  const includeRegex = /(?:include|use)\s*([<"])([^>"]+)([>"])/g;
+  let match;
+  while ((match = includeRegex.exec(content)) !== null) {
+    const depAbsolutePath = path.resolve(path.dirname(filePath), match[2]);
+    getDependencies(depAbsolutePath, visited);
+  }
+
+  return visited;
+}
+
 // Initialize MCP Server
 const server = new Server(
   {
@@ -207,10 +227,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!fs.existsSync(inputPath)) {
           throw new Error(`Input file not found: ${inputPath}`);
         }
-        const scadCode = fs.readFileSync(inputPath, "utf-8");
+
+        // Gather all local dependencies the AI might have referenced
+        const depsMap = getDependencies(inputPath);
+        const scadCode = depsMap.get(inputPath);
+        depsMap.delete(inputPath);
+
+        const additionalFiles = {};
+        const baseDir = path.dirname(inputPath);
+
+        for (const [depPath, content] of depsMap.entries()) {
+          let relPath = path.relative(baseDir, depPath).replace(/\\/g, "/");
+          additionalFiles[relPath] = content;
+        }
 
         const conversionOptions = {
           wasmUrl: `file://${wasmPath}`,
+          additionalFiles,
           ...(options || {}),
         };
 
