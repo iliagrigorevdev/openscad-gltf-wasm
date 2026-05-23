@@ -10,26 +10,14 @@ Instead of relying on the standard OpenSCAD desktop app, this addon seamlessly b
 - **PBR Materials:** Fully supports the extended `color()` syntax from the custom compiler (metalness, roughness, glass transmission, emission).
 - **Skeletal Animations:** Imports rigged armatures and keyframe animations directly into Godot's `Skeleton3D` and `AnimationPlayer` nodes.
 - **Auto-Cleanup:** Translates `.scad` to a temporary `.glb` file, passes it to Godot's advanced scene importer, and automatically cleans up temporary files.
-- **Dual Conversion Modes:** Automatically tries local execution via `npx`, with a fallback to a local API server if Node.js is not in the system path.
 
 ## ⚠️ Prerequisites
 
-The plugin requires a way to execute the `openscad-gltf-wasm` compiler. You have two options:
+Because this plugin downloads and runs a WebAssembly compiler locally, **Node.js must be installed on your system.**
 
-### Option 1: Local Node.js (Recommended)
-
-1. Install [Node.js](https://nodejs.org/).
+1. Install [Node.js](https://nodejs.org/) (which includes `npx`).
 2. Ensure `npx` is available in your system's PATH.
-3. The plugin will automatically run the compiler via `npx`.
-
-### Option 2: Server Mode (Fallback)
-
-If `npx` is not found or fails, the plugin attempts to connect to a local server.
-To start the server, open your terminal and run:
-
-```bash
-npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-serve
-```
+   _(Note for Windows users: The plugin automatically handles routing the command through `cmd.exe`)._
 
 ## 🚀 Installation
 
@@ -43,7 +31,8 @@ npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-serve
 
 1. Place a `.scad` file in your Godot project.
 2. Godot will trigger the importer.
-3. **If conversion fails:** Check the Output console. If `npx` failed, the plugin will try to reach `scad-serve`. Ensure your local server is running if you aren't using the Node.js global path.
+
+> **Note:** The _very first time_ you import a file, the process might take a few extra seconds. The plugin uses `npx` to fetch the `openscad-gltf-wasm` package from GitHub. Subsequent imports will be much faster.
 
 ---
 
