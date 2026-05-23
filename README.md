@@ -134,11 +134,11 @@ The package includes a CLI utility to convert `.scad` files to `.glb` directly f
 
 ---
 
-## Local File Management (`scad-serve`)
+## Local File Management & Conversion (`scad-serve`)
 
-If you are building a web IDE, a generative UI, or using the **AI Studio Extension** and need to read, write, and manage `.scad` files on your local filesystem, this package includes a lightweight Express API server called `scad-serve`.
+If you are building a web IDE, a generative UI, or using the **AI Studio Extension**, you can use the `scad-serve` utility. It provides a REST API to manage local files and perform in-memory SCAD-to-GLB conversions.
 
-It strictly operates **only** on the `.scad` files in the directory where the command is run, preventing arbitrary file traversal.
+It strictly operates **only** on the `.scad` files in the directory where the command is run.
 
 **Start the server using one of these options:**
 
@@ -166,6 +166,10 @@ It strictly operates **only** on the `.scad` files in the directory where the co
   - **Body Payload:** `{ "filename": "model.scad", "content": "cube(10);" }`
 - `DELETE /api/scads/:filename`
   - Deletes a `.scad` file.
+- `POST /api/convert`
+  - **In-memory conversion:** Compiles raw SCAD string to GLB data without writing to the file system.
+  - **Body Payload:** `{ "content": "sphere(r=10);" }`
+  - **Response:** Binary GLB data (`model/gltf-binary`).
 
 ---
 
