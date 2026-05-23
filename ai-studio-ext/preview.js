@@ -199,6 +199,53 @@ function fitCamera() {
   dirLight.shadow.camera.updateProjectionMatrix();
 }
 
+async function fetchDependencies(code) {
+  const additionalFiles = {};
+  const backendUrl = "http://localhost:3000";
+  let serverFiles = [];
+
+  try {
+    // Check if scad-serve backend is available to fetch potential include files
+    const res = await fetch(`${backendUrl}/api/scads`);
+    if (res.ok) {
+      const data = await res.json();
+      serverFiles = data.files || [];
+    }
+  } catch (e) {
+    return additionalFiles; // If backend is offline, we can't resolve deps
+  }
+
+  const visited = new Set();
+
+  async function traverse(currentCode) {
+    const regex = /(?:include|use)\s*([<"])([^>"]+)([>"])/g;
+    let match;
+    while ((match = regex.exec(currentCode)) !== null) {
+      const relPath = match[2];
+      const baseName = relPath.split(/[/\\]/).pop();
+
+      if (!visited.has(relPath) && serverFiles.includes(baseName)) {
+        visited.add(relPath);
+        try {
+          const res = await fetch(
+            `${backendUrl}/api/scads/${encodeURIComponent(baseName)}`,
+          );
+          if (res.ok) {
+            const data = await res.json();
+            additionalFiles[relPath] = data.content;
+            await traverse(data.content);
+          }
+        } catch (err) {
+          console.warn(`Failed to load dependency: ${relPath}`);
+        }
+      }
+    }
+  }
+
+  await traverse(code);
+  return additionalFiles;
+}
+
 async function compileAndRender(scadCode) {
   if (isCompiling) {
     pendingCode = scadCode;
@@ -208,7 +255,11 @@ async function compileAndRender(scadCode) {
   statusEl.innerText = "Compiling WASM...";
 
   try {
-    const gltfData = await convertScadToGltf(scadCode, { wasmUrl });
+    const additionalFiles = await fetchDependencies(scadCode);
+    const gltfData = await convertScadToGltf(scadCode, {
+      wasmUrl,
+      additionalFiles,
+    });
 
     statusEl.innerText = "Loading Scene...";
     await renderGLTF(gltfData);
