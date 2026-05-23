@@ -1,12 +1,11 @@
 {
   "name": "openscad-gltf-wasm",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "type": "module",
   "main": "openscad.js",
   "bin": {
     "scad-convert": "./bin/scad-convert.js",
-    "scad-serve": "./bin/scad-serve.js",
-    "scad-prompt": "./bin/scad-prompt.js"
+    "scad-serve": "./bin/scad-serve.js"
   },
   "exports": {
     ".": "./openscad.js",
