@@ -15,7 +15,4 @@ public:
 	// UFactory interface
 	virtual bool FactoryCanImport(const FString& Filename) override;
 	virtual UObject* FactoryCreateFile(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, const FString& Filename, const TCHAR* Parms, FFeedbackContext* Warn, bool& bOutCanceled) override;
-
-private:
-	bool TryScadServeFallback(const FString& SourcePath, const FString& OutGlbPath);
 };

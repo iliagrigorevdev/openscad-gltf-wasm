@@ -12,9 +12,6 @@ public class ScadImporter : ModuleRules
 		{
 			"UnrealEd",
 			"AssetTools",
-			"HTTP",
-			"Json",
-			"JsonUtilities",
 			"InterchangeCore",
 			"InterchangeEngine"
 		});

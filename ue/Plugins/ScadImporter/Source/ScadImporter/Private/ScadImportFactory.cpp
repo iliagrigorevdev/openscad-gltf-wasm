@@ -2,12 +2,6 @@
 #include "Misc/Paths.h"
 #include "Misc/FileHelper.h"
 #include "HAL/PlatformProcess.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
-#include "Interfaces/IHttpRequest.h"
-#include "Interfaces/IHttpResponse.h"
-#include "Serialization/JsonSerializer.h"
-#include "JsonObjectConverter.h"
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
 
@@ -52,16 +46,12 @@ UObject* UScadImportFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 	FString StdOut, StdErr;
 	FPlatformProcess::ExecProcess(*Command, *Args, &ReturnCode, &StdOut, &StdErr);
 
-	// 4. Fallback to Local HTTP Server
+	// 4. Check if conversion was successful
 	if (ReturnCode != 0 || !FPaths::FileExists(TempGlbPath))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("npx conversion failed. Attempting fallback to local scad-serve..."));
-		if (!TryScadServeFallback(GlobalSource, TempGlbPath))
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to compile SCAD file. Ensure Node.js is installed or scad-serve is running."));
-			UE_LOG(LogTemp, Error, TEXT("npx Output: %s"), *StdErr);
-			return nullptr;
-		}
+		UE_LOG(LogTemp, Error, TEXT("Failed to compile SCAD file. Ensure Node.js is installed."));
+		UE_LOG(LogTemp, Error, TEXT("npx Output: %s"), *StdErr);
+		return nullptr;
 	}
 
 	// 5. Hand over to Unreal's GLTF Importer (Interchange/AssetTools)
@@ -80,55 +70,4 @@ UObject* UScadImportFactory::FactoryCreateFile(UClass* InClass, UObject* InParen
 
 	// Return the primary created object so the Content Browser selects it
 	return ImportedObjects.Num() > 0 ? ImportedObjects[0] : nullptr;
-}
-
-bool UScadImportFactory::TryScadServeFallback(const FString& SourcePath, const FString& OutGlbPath)
-{
-	FString FileContent;
-	if (!FFileHelper::LoadFileToString(FileContent, *SourcePath))
-	{
-		return false;
-	}
-
-	// Create JSON Payload
-	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
-	JsonObject->SetStringField(TEXT("content"), FileContent);
-	FString JsonPayload;
-	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&JsonPayload);
-	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
-
-	// Create HTTP Request
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(TEXT("http://127.0.0.1:3000/api/convert"));
-	Request->SetVerb(TEXT("POST"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	Request->SetContentAsString(JsonPayload);
-	Request->ProcessRequest();
-
-	// Pseudo-blocking wait to mimic synchronous factory behavior
-	double StartTime = FPlatformTime::Seconds();
-	while (Request->GetStatus() == EHttpRequestStatus::Processing)
-	{
-		// Timeout after 60 seconds
-		if (FPlatformTime::Seconds() - StartTime > 60.0)
-		{
-			Request->CancelRequest();
-			return false;
-		}
-		
-		// Tick HTTP manager and sleep slightly to avoid locking the editor completely
-		FHttpModule::Get().GetHttpManager().Tick(0.1f);
-		FPlatformProcess::Sleep(0.01f);
-	}
-
-	if (Request->GetStatus() == EHttpRequestStatus::Succeeded && Request->GetResponse()->GetResponseCode() == 200)
-	{
-		const TArray<uint8>& BinaryData = Request->GetResponse()->GetContent();
-		if (BinaryData.Num() > 0)
-		{
-			return FFileHelper::SaveArrayToFile(BinaryData, *OutGlbPath);
-		}
-	}
-
-	return false;
 }
