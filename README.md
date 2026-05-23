@@ -325,29 +325,6 @@ The `options` object (or parsed CLI `options_json`) configures which feature-spe
 
 ---
 
-## 🤖 MCP Server Integration
-
-This repository includes a fully functional **Model Context Protocol (MCP)** server. This allows any MCP-compatible client or AI assistant to natively design OpenSCAD scripts and compile them into `.glb` 3D files directly on your computer.
-
-### Configuration
-
-Add the following configuration block to your MCP client's configuration file:
-
-```json
-{
-  "mcpServers": {
-    "openscad-gltf": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "--package=github:iliagrigorevdev/openscad-gltf-wasm",
-        "scad-mcp"
-      ]
-    }
-  }
-}
-```
-
 ### Workflow
 
 Once connected, an AI assistant can use the server to execute the following loop:
