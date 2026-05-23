@@ -2,31 +2,6 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import { convertScadToGltf } from "../convert.js";
-
-// Resolve the local WASM file path
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const wasmPath = path.resolve(__dirname, "../openscad.wasm");
-
-// Polyfill fetch so the WASM loader works natively in Node.js
-const originalFetch = global.fetch;
-global.fetch = async (url, options) => {
-  const urlStr = url.toString();
-  if (urlStr.startsWith("file://") || urlStr.endsWith(".wasm")) {
-    const normalizedPath = urlStr.startsWith("file://")
-      ? fileURLToPath(urlStr)
-      : urlStr;
-
-    const buffer = fs.readFileSync(normalizedPath);
-    return new Response(buffer, {
-      status: 200,
-      headers: { "Content-Type": "application/wasm" },
-    });
-  }
-  return originalFetch ? originalFetch(url, options) : undefined;
-};
 
 // Parse CLI arguments
 const args = process.argv.slice(2);
@@ -147,30 +122,6 @@ app.delete("/api/scads/:filename", (req, res) => {
   } catch (err) {
     console.error(`Error deleting ${filename}:`, err);
     res.status(500).json({ error: "Failed to delete file." });
-  }
-});
-
-// 5. Convert SCAD to GLB
-app.post("/api/convert", async (req, res) => {
-  const { content } = req.body;
-
-  if (!content) {
-    return res
-      .status(400)
-      .json({ error: "Missing 'content' in request body." });
-  }
-
-  try {
-    // Pass the raw SCAD directly to the WASM converter entirely in-memory
-    const glbData = await convertScadToGltf(content, {
-      wasmUrl: `file://${wasmPath}`,
-    });
-
-    res.setHeader("Content-Type", "model/gltf-binary");
-    res.send(Buffer.from(glbData));
-  } catch (err) {
-    console.error("SCAD Conversion Error:", err);
-    res.status(500).json({ error: "Failed to convert SCAD to GLB." });
   }
 });
 
