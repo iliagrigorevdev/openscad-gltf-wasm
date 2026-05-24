@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Safely resolve symlinks to find the actual package directory (required for npx)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )/.." >/dev/null 2>&1 && pwd )"
+
 # Check if task is provided via argument, otherwise read from STDIN if piped
 if [ -n "$1" ]; then
   TASK="$1"
@@ -9,12 +18,13 @@ fi
 
 if [ -z "$TASK" ]; then
   echo "Error: Task parameter is required."
-  echo "Usage: ./prompt.sh \"<description of the game to generate>\""
-  echo "   or: echo \"<description>\" | ./prompt.sh"
+  echo "Usage: scad-godot-prompt \"<description of the game to generate>\""
+  echo "   or: echo \"<description>\" | scad-godot-prompt"
   exit 1
 fi
 
-cat <<EOF | ../../clip.sh ../prompt.js addons/scad_importer/*
+# Execute clip.sh using absolute paths from the resolved package root
+cat <<EOF | "$DIR/clip.sh" "$DIR/prompt.js" "$DIR/godot/addons/scad_importer/"*
 You are an expert Godot 4 game developer and procedural 3D technical artist.
 
 Input Task:

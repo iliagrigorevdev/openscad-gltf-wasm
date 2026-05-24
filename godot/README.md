@@ -47,6 +47,28 @@ npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-serve
 
 ---
 
+## 🤖 AI Project Generation (`scad-godot-prompt`)
+
+Because LLMs (like Gemini or Claude) only know standard OpenSCAD syntax up to their training cutoff, this package includes a powerful CLI utility designed to generate an exhaustive LLM prompt for scaffolding a **complete Godot 4 project** utilizing procedural OpenSCAD assets.
+
+This tool automatically bundles the extended OpenSCAD syntax rules, the source code of this Godot Importer Addon, and your specific game description into a massive context block, and **copies it directly to your system clipboard**.
+
+### 1. Run the prompt generator:
+
+```bash
+npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-godot-prompt "A 3D platformer game with a robotic frog"
+```
+
+### 2. Workflow Pipeline:
+
+1. **Run the command** above. The generated context prompt is automatically copied to your clipboard (requires `pbcopy`, `xclip`, or `termux-clipboard-set`).
+2. **Paste the prompt** into an advanced LLM (e.g., Gemini Pro).
+3. **Generate Script:** The LLM will follow the strict prompt instructions to generate a single, self-contained `build_game.js` script.
+4. **Execute:** Save and run `node build_game.js` locally. It will programmatically generate the project folder, OpenSCAD game assets (`.scad`), Godot scenes (`.tscn`), and scripts (`.gd`) with the importer addon automatically configured.
+5. **Play:** Open the newly generated folder in the Godot Editor and test your AI-generated game!
+
+---
+
 ## ⚖️ Licensing & Legal
 
 This project utilizes a separated architecture that allows it to interact with a copyleft tool without inheriting its license restrictions.
