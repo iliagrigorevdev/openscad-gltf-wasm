@@ -30,6 +30,7 @@ What to generate:
    - The scenes should directly instance the generated \`.scad\` files (the provided addon will handle importing them as 3D scenes).
    - Generate a \`project.godot\` file. It must configure the project and automatically enable the \`scad_importer\` plugin.
    - Generate a \`.gitignore\` file that ignores the \`.godot/\` folder.
+   - Generate a \`README.md\` file that documents the project, gameplay mechanics, and controls.
 
 3. Delivery Format (Single Node.js Script):
    - Output exactly ONE self-contained Node.js script. Do not output manual setup instructions.
