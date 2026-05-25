@@ -9,22 +9,58 @@ while [ -h "$SOURCE" ]; do
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )/.." >/dev/null 2>&1 && pwd )"
 
+TASK=""
+OPTIONS_JSON="{}"
+
 # Check if task is provided via argument, otherwise read from STDIN if piped
-if [ -n "$1" ]; then
-  TASK="$1"
-elif [ ! -t 0 ]; then
+if [ ! -t 0 ]; then
   TASK=$(cat)
+  if [ -n "$1" ]; then
+    OPTIONS_JSON="$1"
+  fi
+else
+  if [ -n "$1" ]; then
+    TASK="$1"
+  fi
+  if [ -n "$2" ]; then
+    OPTIONS_JSON="$2"
+  fi
 fi
 
 if [ -z "$TASK" ]; then
   echo "Error: Task parameter is required."
-  echo "Usage: scad-godot-prompt \"<description of the game to generate>\""
-  echo "   or: echo \"<description>\" | scad-godot-prompt"
+  echo "Usage: scad-godot-prompt \"<description of the game to generate>\" [options_json]"
+  echo "   or: echo \"<description>\" | scad-godot-prompt [options_json]"
+  echo ""
+  echo "Example with JSON options:"
+  echo "  scad-godot-prompt \"Game description\" '{\"animation\": false, \"transmission\": false}'"
+  exit 1
+fi
+
+# Execute node to dynamically generate the OpenSCAD portion of the prompt using the JS method
+PROMPT_RULES=$(PROMPT_JS="$DIR/prompt.js" TASK_STR="the 3D assets for the game" OPTIONS_JSON="$OPTIONS_JSON" node -e "
+import('node:url').then(url => import(url.pathToFileURL(process.env.PROMPT_JS).href)).then(m => {
+  const task = process.env.TASK_STR;
+  let options = {};
+  if (process.env.OPTIONS_JSON) {
+    try {
+      options = JSON.parse(process.env.OPTIONS_JSON);
+    } catch (e) {
+      console.error('Invalid JSON options: ' + process.env.OPTIONS_JSON);
+      process.exit(1);
+    }
+  }
+  console.log(m.generatePrompt(task, options));
+}).catch(e => { console.error(e); process.exit(1); });
+")
+
+if [ $? -ne 0 ]; then
+  echo "Error generating prompt rules from prompt.js"
   exit 1
 fi
 
 # Execute clip.sh using absolute paths from the resolved package root
-cat <<EOF | "$DIR/clip.sh" "$DIR/prompt.js" "$DIR/godot/addons/scad_importer/"*
+cat <<EOF | "$DIR/clip.sh" "$DIR/godot/addons/scad_importer/"*
 You are an expert Godot 4 game developer and procedural 3D technical artist.
 
 Input Task:
@@ -33,7 +69,11 @@ Design and implement a Godot 4 project for the following game concept: "${TASK}"
 What to generate:
 1. 3D Game Assets (.scad):
    - Generate procedural 3D models for the game using OpenSCAD.
-   - CRITICAL: You must use the custom OpenSCAD glTF extensions for PBR materials (e.g., \`roughness\`, \`metalness\`, \`emissive\`) and Skeletal Animations (\`armature()\`, \`bone()\`). The rules and syntax for these features are documented inside the string templates of the provided \`prompt.js\` file. Read it carefully to understand the custom syntax.
+   - CRITICAL: You must use the custom OpenSCAD glTF extensions for PBR materials (e.g., \`roughness\`, \`metalness\`, \`emissive\`) and Skeletal Animations (\`armature()\`, \`bone()\`). The rules and syntax for these features are provided below:
+
+=== OPENSCAD SYNTAX RULES ===
+${PROMPT_RULES}
+=============================
 
 2. Godot 4 Project Files:
    - Create the necessary GDScript (\`.gd\`) and scene (\`.tscn\`) files to implement the game logic, responsive player input controls, and a core gameplay loop.

@@ -59,6 +59,28 @@ This tool automatically bundles the extended OpenSCAD syntax rules, the source c
 npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-godot-prompt "A 3D platformer game with a robotic frog"
 ```
 
+You can also pass prompt options as a JSON string to toggle specific features (e.g., disabling animation or transmission):
+
+```bash
+npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-godot-prompt "A 3D platformer game with a robotic frog" '{"animation": false, "transmission": false}'
+```
+
+### Available Prompt Options
+
+The options JSON configures which feature-specific syntax blocks are included in the generated prompt.
+
+| Option            | Type      | Default | Description                                                                                                             |
+| :---------------- | :-------- | :------ | :---------------------------------------------------------------------------------------------------------------------- |
+| `basic`           | `boolean` | `true`  | Includes basic PBR material rules (`roughness`, `metalness`).                                                           |
+| `transmission`    | `boolean` | `true`  | Includes transparency and volume rules (`transmission`, `thickness`, `ior`, `attenuationColor`, `attenuationDistance`). |
+| `clearcoat`       | `boolean` | `true`  | Includes clearcoat rules (`clearcoat`, `clearcoatRoughness`).                                                           |
+| `sheen`           | `boolean` | `true`  | Includes fabric sheen rules (`sheen`, `sheenColor`, `sheenRoughness`).                                                  |
+| `emissive`        | `boolean` | `true`  | Includes emission/glow rules (`emissive`, `emissiveIntensity`).                                                         |
+| `specular`        | `boolean` | `true`  | Includes specular highlight rules (`specularColor`, `specularIntensity`).                                               |
+| `iridescence`     | `boolean` | `true`  | Includes thin-film iridescence rules (`iridescence`, `iridescenceIOR`).                                                 |
+| `autoSmoothAngle` | `boolean` | `true`  | Includes custom mesh smoothing rules (`autoSmoothAngle`).                                                               |
+| `animation`       | `boolean` | `true`  | Includes hierarchical bone and armature rules (`armature`, `bone`).                                                     |
+
 ### 2. Workflow Pipeline:
 
 1. **Run the command** above. The generated context prompt is automatically copied to your clipboard (requires `pbcopy`, `xclip`, or `termux-clipboard-set`).
