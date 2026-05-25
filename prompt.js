@@ -37,8 +37,8 @@ export function generatePrompt(description, options = {}) {
 - Use this exact format: /* Model Name: your_model_name_here */`;
   }
 
-  prompt += `\n- Coordinate System: Write standard OpenSCAD Z-up code (+Z is UP, XY plane is ground). DO NOT manually rotate or convert coordinates to match glTF's Y-up system; the GLB exporter handles the Z-up to Y-up conversion automatically. Build objects standing upright and facing Front (Negative Y-axis).
-- Left/Right Convention: Always name and position "left" and "right" components (e.g., LeftArm, RightEye) based on the object's anatomical point of view (facing Forward towards -Y), NOT the camera/viewer's screen perspective. Because the object faces -Y, the object's Left side is along the +X axis, and the object's Right side is along the -X axis.`;
+  prompt += `\n- Coordinate System: Write standard OpenSCAD Z-up code (+Z is UP, XY plane is ground). DO NOT manually rotate or convert coordinates to match glTF's Y-up system; the GLB exporter handles the Z-up to Y-up conversion automatically. Build objects standing upright and facing Front (Positive Y-axis).
+- Left/Right Convention: Always name and position "left" and "right" components (e.g., LeftArm, RightEye) based on the object's anatomical point of view (facing Forward towards +Y), NOT the camera/viewer's screen perspective. Because the object faces +Y, the object's Left side is along the -X axis, and the object's Right side is along the +X axis.`;
 
   let attrs = [];
   if (opts.basic) attrs.push("'roughness'", "'metalness'");
