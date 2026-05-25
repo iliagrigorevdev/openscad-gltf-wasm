@@ -50,6 +50,9 @@ import('node:url').then(url => import(url.pathToFileURL(process.env.PROMPT_JS).h
       process.exit(1);
     }
   }
+  // Disable the modelName instructions specifically for the Godot wrapper context
+  // This prevents the LLM from trying to wrap generated SCAD files in \`\`\`openscad when outputting Node.js
+  options.modelName = false;
   console.log(m.generatePrompt(task, options));
 }).catch(e => { console.error(e); process.exit(1); });
 ")

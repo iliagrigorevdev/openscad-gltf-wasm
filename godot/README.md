@@ -65,8 +65,6 @@ You can also pass prompt options as a JSON string to toggle specific features (e
 npx -p github:iliagrigorevdev/openscad-gltf-wasm scad-godot-prompt "A 3D platformer game with a robotic frog" '{"animation": false, "transmission": false}'
 ```
 
-### Available Prompt Options
-
 The options JSON configures which feature-specific syntax blocks are included in the generated prompt.
 
 | Option            | Type      | Default | Description                                                                                                             |
