@@ -11,7 +11,7 @@ This WASM module was generated from the `gltf` branch of the forked [openscad](h
 ## Features
 
 - **Direct SCAD to GLB conversion:** Compile geometry directly to web-ready binary glTF.
-- **Extended PBR Material Support:** Native extensions to the OpenSCAD `color()` module supporting `metalness`, `roughness`, `transmission` (glass), `clearcoat`, `sheen`, `ior`, `emissive`, `specular`, `iridescence`, and `autoSmoothAngle`.
+- **Extended PBR Material Support:** Native extensions to the OpenSCAD `color()` module supporting `metalness`, `roughness`, `transmission` (glass), `clearcoat`, `sheen`, `ior`, `emissive`, `specular`, and `iridescence`, plus a `$asa` special variable for auto smooth shading.
 - **Skeletal Animation:** Define animated armatures and bones directly within your `.scad` files.
 - **True Skeletal Skinning:** Exports absolute world transforms and properly bound animation tracks.
 - **LLM Friendly:** Includes a built-in prompt generator (`prompt.js`) to help AI models (like Gemini or Claude) write compatible OpenSCAD scripts utilizing the new features.
@@ -210,6 +210,9 @@ This custom fork introduces new syntax not found in standard OpenSCAD.
 The standard `color()` module has been extended with standard glTF PBR attributes:
 
 ```openscad
+// You can set the default auto smooth angle globally
+$asa = 30.0;
+
 color(
     "white",
     roughness = 0.0,           // 0.0 (glossy) to 1.0 (matte)
@@ -230,7 +233,7 @@ color(
     specularIntensity = 1.0,    // Strength of specular highlights
     iridescence = 0.0,          // Thin-film interference effect (soap bubble)
     iridescenceIOR = 1.3,
-    autoSmoothAngle = 30.0      // Generates smooth vertex normals below this angle threshold
+    $asa = 45.0                 // Generates smooth vertex normals below this angle threshold (overrides global $asa)
 ) {
     cylinder(h=10, r=5);
 }

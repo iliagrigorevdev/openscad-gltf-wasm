@@ -42,7 +42,6 @@ export function generatePrompt(description, options = {}) {
 
   let attrs = [];
   if (opts.basic) attrs.push("'roughness'", "'metalness'");
-  if (opts.autoSmoothAngle) attrs.push("'autoSmoothAngle'");
   if (opts.clearcoat) attrs.push("'clearcoat'", "'clearcoatRoughness'");
   if (opts.sheen) attrs.push("'sheen'", "'sheenColor'", "'sheenRoughness'");
   if (opts.transmission)
@@ -57,8 +56,11 @@ export function generatePrompt(description, options = {}) {
   if (opts.specular) attrs.push("'specularColor'", "'specularIntensity'");
   if (opts.iridescence) attrs.push("'iridescence'", "'iridescenceIOR'");
 
-  if (attrs.length > 0) {
-    prompt += `\n\nPlease utilize extended color attributes, specifically including ${attrs.join(", ")} parameters.\n\nImportant PBR rules:`;
+  if (attrs.length > 0 || opts.autoSmoothAngle) {
+    if (attrs.length > 0) {
+      prompt += `\n\nPlease utilize extended color attributes, specifically including ${attrs.join(", ")} parameters.`;
+    }
+    prompt += `\n\nImportant PBR & Shading rules:`;
 
     if (opts.basic) {
       prompt += `\n- Metalness: For solid metallic materials (e.g., gold, steel), use metalness near 1.0. High metalness blocks light transmission. (Default: 0.0)`;
@@ -89,7 +91,7 @@ export function generatePrompt(description, options = {}) {
       prompt += `\n- Iridescence & Iridescence IOR: Simulates thin-film interference like soap bubbles, oil spills, or pearlescent surfaces. (Defaults: 0.0 and 1.3)`;
     }
     if (opts.autoSmoothAngle) {
-      prompt += `\n- Auto Smooth Angle: Generates smooth vertex normals for adjoining faces with an angle difference less than this value (in degrees). Use > 0 (e.g., 30 or 45) for curved/smooth surfaces, 0.0 for flat shading. (Default: 0.0)`;
+      prompt += `\n- Auto Smooth Angle: Generates smooth vertex normals for adjoining faces with an angle difference less than this value (in degrees). Use > 0 (e.g., 30 or 45) for curved/smooth surfaces, 0.0 for flat shading. Can be set globally using the special variable $asa (e.g., $asa=30;), or overridden per-material via the $asa parameter. (Default: 0.0)`;
     }
 
     let exampleParams = [];
@@ -101,7 +103,7 @@ export function generatePrompt(description, options = {}) {
     if (opts.emissive)
       exampleParams.push("emissive=[0.0, 0.5, 1.0]", "emissiveIntensity=2.0");
     if (opts.specular) exampleParams.push("specularIntensity=1.0");
-    if (opts.autoSmoothAngle) exampleParams.push("autoSmoothAngle=45.0");
+    if (opts.autoSmoothAngle) exampleParams.push("$asa=45.0");
 
     let exampleStr =
       exampleParams.length > 0 ? ", " + exampleParams.join(", ") : "";
