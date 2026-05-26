@@ -233,7 +233,7 @@ color(
     specularIntensity = 1.0,    // Strength of specular highlights
     iridescence = 0.0,          // Thin-film interference effect (soap bubble)
     iridescenceIOR = 1.3,
-    $asa = 45.0                 // Generates smooth vertex normals below this angle threshold (overrides global $asa)
+    $asa = 45.0                 // Generates smooth vertex normals below this angle threshold (overrides global $asa). Applies to surface shading only, not geometry polygon count. Do not pass $asa to geometry modules.
 ) {
     cylinder(h=10, r=5);
 }
