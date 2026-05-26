@@ -140,6 +140,7 @@ function renderGLTF(outputArray) {
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
+            child.frustumCulled = false;
           }
         });
 
