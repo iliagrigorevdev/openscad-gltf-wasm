@@ -28,15 +28,15 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
     args.append(temp_glb_path)
 
     var output = []
-    print("Importing SCAD via npx... (This might take a few seconds on the first run)")
+    print("Importing %s via npx... (This might take a few seconds on the first run)" % path.get_file())
     var exit_code = OS.execute(npx_command, args, output, true)
 
     if exit_code != 0:
-        print("npx conversion failed (Node.js/NPM not found or command failed). Attempting fallback to local scad-serve...")
+        print("npx conversion failed for %s. Attempting fallback to local scad-serve..." % path.get_file())
         var fallback_success = _try_scad_serve_fallback(global_source, temp_glb_path)
 
         if not fallback_success:
-            push_error("Failed to compile SCAD file. Ensure Node.js is installed or scad-serve is running.")
+            push_error("Failed to compile SCAD file: %s. Ensure Node.js is installed or scad-serve is running." % path.get_file())
             push_error("npx output: ", "\n".join(output))
             return null
 
@@ -48,7 +48,7 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
         DirAccess.remove_absolute(temp_glb_path)
 
     if err != OK:
-        push_error("Failed to parse the generated GLB.")
+        push_error("Failed to parse the generated GLB for %s." % path.get_file())
         return null
 
     var generated_scene = gltf_doc.generate_scene(gltf_state)
@@ -188,7 +188,7 @@ func _try_scad_serve_fallback(source_path: String, out_glb_path: String) -> bool
         out_file.store_buffer(rb)
         out_file.close()
 
-        print("Successfully compiled SCAD using scad-serve fallback.")
+        print("Successfully compiled %s using scad-serve fallback." % source_path.get_file())
         return true
 
     return false
