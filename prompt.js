@@ -1,6 +1,6 @@
 /**
- * Generates an LLM prompt containing the required syntax rules for PBR and Animations
- * in this custom OpenSCAD fork.
+ * Generates an LLM prompt containing the required syntax rules for PBR, Animations,
+ * and Texture Baking in this custom OpenSCAD fork.
  *
  * @param {string} description - The description of the object you want the AI to design.
  * @param {Object} options - Toggles for different prompt blocks
@@ -19,6 +19,8 @@ export function generatePrompt(description, options = {}) {
     emissive: options.emissive ?? true,
     specular: options.specular ?? true,
     iridescence: options.iridescence ?? true,
+    bakeColors: options.bakeColors ?? false,
+    bakeNormals: options.bakeNormals ?? false,
     autoSmoothAngle: options.autoSmoothAngle ?? true,
     animation: options.animation ?? true,
     lazyUnion: options.lazyUnion ?? false,
@@ -163,6 +165,50 @@ armature(animations=anim_data) {
       color([0.8, 0.2, 0.2]) cylinder(h=5, r=2);
     }
   }
+}`;
+  }
+
+  if (opts.bakeColors || opts.bakeNormals) {
+    const flags = [];
+    const explanations = [];
+    if (opts.bakeColors) {
+      flags.push("colors=true");
+      explanations.push(
+        "- Set 'colors=true' (default false) to project and bake the high-poly's solid colors onto the low-poly mesh.",
+      );
+    }
+    if (opts.bakeNormals) {
+      flags.push("normals=true");
+      explanations.push(
+        "- Set 'normals=true' (default false) to project and bake the high-poly's physical geometric details as a tangent-space normal map onto the low-poly mesh.",
+      );
+    }
+    explanations.push(
+      "- You can customize the baking process using 'distance' (max ray length, default: 2.0), 'bias' (ray origin offset, default: 1e-4), 'dilation' (pixel padding around UV islands, default: 8), 'resolution' (texture dimensions, default: 2048), 'msaa' (super-sampling anti-aliasing level, default: 2), and 'index' (atlas group identifier, default: 0).",
+    );
+    explanations.push(
+      "- The 'index' parameter enables multi-atlas texture baking. Low-poly meshes configured with the same 'index' will be packed together into a shared texture atlas, while meshes with distinct indices will be split into separate output image maps.",
+    );
+    flags.push("resolution=1024");
+    flags.push("msaa=3");
+    const bakeSig = flags.length > 0 ? `bake(${flags.join(", ")})` : "bake()";
+
+    const explanationText =
+      explanations.length > 0
+        ? explanations.join("\n")
+        : "- You can toggle what gets baked using the 'colors' and 'normals' boolean parameters (both default to false).";
+
+    prompt += `\n\nImportant Texture Baking rules:
+- Baking: Use the '${bakeSig}' module to project details from a high-resolution mesh onto a low-resolution mesh.
+- UV Unwrapping: The engine automatically generates UV coordinates and bakes the textures for the low-poly child mesh; you do not need to manually map textures.
+- Usage: The 'bake()' module strictly requires exactly TWO children. The FIRST child is the high-poly geometry, and the SECOND child is the low-poly geometry.
+${explanationText}
+
+Example Baking Usage:
+// Bake the selected details of a high-resolution sphere onto a low-resolution one
+${bakeSig} {
+  color("white") sphere(r=10, $fn=100); // Child 1: High Poly
+  color("white", roughness=0.5, $asa=45) sphere(r=10, $fn=20); // Child 2: Low Poly
 }`;
   }
 

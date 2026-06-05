@@ -99,6 +99,8 @@ function createPromptModal() {
       <div class="scad-prompt-toggles">
         <label><input type="checkbox" id="ext-opt-pbr-basic" checked /> Basic PBR</label>
         <label><input type="checkbox" id="ext-opt-pbr-autosmooth" checked /> Auto Smooth</label>
+        <label><input type="checkbox" id="ext-opt-bake-colors" /> Bake Colors</label>
+        <label><input type="checkbox" id="ext-opt-bake-normals" /> Bake Normals</label>
         <label><input type="checkbox" id="ext-opt-anim" checked /> Animations</label>
       </div>
 
@@ -207,6 +209,8 @@ function createPromptModal() {
       iridescence: document.getElementById("ext-opt-pbr-iridescence").checked,
       autoSmoothAngle: document.getElementById("ext-opt-pbr-autosmooth")
         .checked,
+      bakeColors: document.getElementById("ext-opt-bake-colors").checked,
+      bakeNormals: document.getElementById("ext-opt-bake-normals").checked,
       animation: document.getElementById("ext-opt-anim").checked,
     };
 

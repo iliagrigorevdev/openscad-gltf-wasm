@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "openscad-gltf-wasm": "github:iliagrigorevdev/openscad-gltf-wasm",
+    "openscad-gltf-wasm": "github:iliagrigorevdev/openscad-gltf-wasm#texture",
     "three": "^0.184.0"
   },
   "devDependencies": {
